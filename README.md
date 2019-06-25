@@ -20,4 +20,4 @@ Read only tools (in Java) for AWS resources.
  	- Or, run `$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc plain demo-profile` in plain mode.
 
 ## More Information about the Usage
-+ `showVpc` can be used to check [Well-Architected practices](https://aws.amazon.com/architecture/well-architected/).
++ `showVpc` can help checking the reliability pillar of [Well-Architected practices](https://aws.amazon.com/architecture/well-architected/).
