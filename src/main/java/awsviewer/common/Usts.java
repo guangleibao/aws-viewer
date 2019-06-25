@@ -17,7 +17,6 @@ public class Usts implements CUtil {
 
     @Override
     public void printAllResource(SdkClient c, Speaker skBranch) {
-        StsClient sts = (StsClient) c;
     }
 
     /**

@@ -15,6 +15,8 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 2. Run **`$ mvn package`**
 
 ## Run
++ Get help:
+	- Run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar`**
 + For example, if the VPC name is **`demo-vpc`** and the named profile is **`demo-profile`**:
 	- Run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc redact demo-profile`** in redact mode (recommanded).
  	- Or, run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc plain demo-profile`** in plain mode.

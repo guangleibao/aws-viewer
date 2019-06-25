@@ -134,7 +134,7 @@ public class WaTool {
             wt.showVpc(args[1], args[2], args[3]);
         } else {
             System.out.println("Usage:");
-            System.out.println("showVpc <vpc-name-prefix> <mode: plain|redact> <profile>");
+            System.out.println("showVpc <vpc: vpc-name-prefix|vpc-id> <mode: plain|redact> <profile: pick up a profile name which have read permission on vpc resources>");
         }
     }
 
