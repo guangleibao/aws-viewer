@@ -148,6 +148,8 @@ public class WaTool {
         Uelasticloadbalancingv2 uelbv2 = Uelasticloadbalancingv2.build();
         Uelasticloadbalancing uelb = Uelasticloadbalancing.build();
         Filter vpcF = uec2.createFilterEc2("tag:Name", prefix + "*");
+        Filter vpcF2 = uec2.createFilterEc2("vpc-id", prefix);
+        Filter[] tries = new Filter[]{vpcF,vpcF2};
         Speaker mSpeaker = this.sk.clone();
         // mSpeaker.smartPrintTitle("Show VPC: ");
         Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, profile);
@@ -168,8 +170,9 @@ public class WaTool {
         // List<Vpc> vpcs =
         // ec2.describeVpcs(DescribeVpcsRequest.builder().filters(vpcF).build()).vpcs();
         // VPC Paginator
+        for(Filter f:tries){
         Iterator<DescribeVpcsResponse> iterVpcs = ec2
-                .describeVpcsPaginator(DescribeVpcsRequest.builder().filters(vpcF).build()).iterator();
+                .describeVpcsPaginator(DescribeVpcsRequest.builder().filters(f).build()).iterator();
         while (iterVpcs.hasNext()) {
             List<Vpc> vpcs = iterVpcs.next().vpcs();
             for (Vpc vpc : vpcs) {
@@ -1176,6 +1179,7 @@ public class WaTool {
                 vSpeaker.printResult(true, "#TTL-VPC-EC2:" + ec2Count + "\n");
                 vSpeaker.smartPrintTitle("End VPC: " + vpcName);
             } // End VPC
+        }
         }
     }
 
