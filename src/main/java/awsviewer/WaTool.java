@@ -243,10 +243,17 @@ public class WaTool {
                         if (subnetToRoutetable.get("main") != null) {
                             mainRt = subnetToRoutetable.get("main");
                         }
-                        rtSpeaker.smartPrintResult(true,
+                        if(mainRt!=null){
+                            rtSpeaker.smartPrintResult(true,
                                 Speaker.RT + " RT-" + (++rtCount) + ": " + uec2.getNameTagValueEc2(rt.tags()) + "|"
                                         + rt.routeTableId() + ", main:"
                                         + (mainRt.equals(rt.routeTableId()) ? "Yes" : "No"));
+                        }
+                        else{
+                            rtSpeaker.smartPrintResult(true,
+                                Speaker.RT + " RT-" + (++rtCount) + ": " + uec2.getNameTagValueEc2(rt.tags()) + "|"
+                                        + rt.routeTableId());
+                        }
                         List<Route> routes = rt.routes();
                         int ruleCount = 0;
                         for (Route r : routes) {
