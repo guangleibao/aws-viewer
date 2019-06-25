@@ -440,18 +440,4 @@ public class Speaker implements Serializable{
         }
         this.smartPrintResult(true, Speaker.BLOCK+" Checking ||| "+cUtilName+" |||");
     }
-
-    /**
-     * Should be used in CUtil class's destroyResourceByNamePrefix() method, more specifically - the mSpeaker which clones skBranch.
-     */
-    public void printDestroyResourceByNamePrefix(String overrideResourceName, String prefix){
-        String cUtilName = null;
-        if(overrideResourceName!=null){
-            cUtilName = overrideResourceName;
-        }
-        else{
-            cUtilName =Thread.currentThread().getStackTrace()[2].getClassName().replaceAll("bglutil.common.U","");
-        }
-        this.smartPrintResult(true, Speaker.REMOVING+" Deleting "+cUtilName+" with name prefix "+prefix); 
-    }
 }
