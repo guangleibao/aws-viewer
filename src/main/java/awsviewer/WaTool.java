@@ -725,8 +725,12 @@ public class WaTool {
                                                 + hp.redactArn(fc.functionArn()) + ", " + fc.version() + ", runtime:"
                                                 + fc.runtime() + ", handler:" + fc.handler() + ", mem:" + fc.memorySize()
                                                 + "m, ttl:" + fc.timeout() + "s");
-                            }
-                            fSpeaker.printResult(true, "role: " + fc.role());
+							}
+							if(mode.equals(PLAIN)){
+								fSpeaker.printResult(true, "role: " + fc.role());
+							} else {
+								fSpeaker.printResult(true, "role: " + hp.redactArn(fc.role()));
+							}
                             fSpeaker.printResult(true,
                                     "protected-by: " + uec2.decodeSgsByIds(ec2, fc.vpcConfig().securityGroupIds()));
                             fSpeaker.printResult(true, uec2.decodeSubnetsById(ec2, fc.vpcConfig().subnetIds()));
