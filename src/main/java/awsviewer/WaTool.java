@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.cloudwatch.model.Dimension;
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeNatGatewaysRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeNetworkAclsRequest;
@@ -138,9 +139,9 @@ public class WaTool {
 		}
 	}
 
-	private void showVpc(String prefix, String mode, String profile) throws Exception {
+	public void showVpc(String prefix, String mode, String profile) throws Exception {
         // ------------- INIT
-        //final String REDACT = "redact"; // Safe option, "redact" is the default option.
+        final String REDACT = "redact";
         final String PLAIN = "plain";
         General.init(profile);
         Uec2 uec2 = Uec2.build();
@@ -176,13 +177,15 @@ public class WaTool {
                 Filter eniF = Filter.builder().name("vpc-id").values(vpc.vpcId()).build();
                 List<Subnet> subnetsInVpc = new ArrayList<Subnet>();
                 List<NetworkInterface> enisInVpc = new ArrayList<NetworkInterface>();
-                Iterator<DescribeSubnetsResponse> iterSubnetsInVpc = ec2.describeSubnetsPaginator(DescribeSubnetsRequest.builder().filters(subnetF).build()).iterator();
-                while(iterSubnetsInVpc.hasNext()){
+                Iterator<DescribeSubnetsResponse> iterSubnetsInVpc = ec2
+                        .describeSubnetsPaginator(DescribeSubnetsRequest.builder().filters(subnetF).build()).iterator();
+                while (iterSubnetsInVpc.hasNext()) {
                     List<Subnet> subnets = iterSubnetsInVpc.next().subnets();
                     subnetsInVpc.addAll(subnets);
                 }
-                Iterator<DescribeNetworkInterfacesResponse> iterEnis = ec2.describeNetworkInterfacesPaginator(DescribeNetworkInterfacesRequest.builder().filters(eniF).build()).iterator();
-                while(iterEnis.hasNext()){
+                Iterator<DescribeNetworkInterfacesResponse> iterEnis = ec2.describeNetworkInterfacesPaginator(
+                        DescribeNetworkInterfacesRequest.builder().filters(eniF).build()).iterator();
+                while (iterEnis.hasNext()) {
                     List<NetworkInterface> enis = iterEnis.next().networkInterfaces();
                     enisInVpc.addAll(enis);
                 }
@@ -613,10 +616,13 @@ public class WaTool {
                                         + ec.registeredContainerInstancesCount() + ", service:"
                                         + ec.activeServicesCount() + ", task(run/pending):" + ec.runningTasksCount()
                                         + "/" + ec.pendingTasksCount());
-                        Iterator<ListContainerInstancesResponse> iterContainerInstanceArns = ecs.listContainerInstancesPaginator(
-                                        ListContainerInstancesRequest.builder().cluster(ec.clusterName()).build()).iterator();
-                        while(iterContainerInstanceArns.hasNext()){
-                            List<String> containerInstanceArns = iterContainerInstanceArns.next().containerInstanceArns();
+                        Iterator<ListContainerInstancesResponse> iterContainerInstanceArns = ecs
+                                .listContainerInstancesPaginator(
+                                        ListContainerInstancesRequest.builder().cluster(ec.clusterName()).build())
+                                .iterator();
+                        while (iterContainerInstanceArns.hasNext()) {
+                            List<String> containerInstanceArns = iterContainerInstanceArns.next()
+                                    .containerInstanceArns();
                             for (String instanceArn : containerInstanceArns) {
                                 Speaker iSpeaker = ecsSpeaker.clone();
                                 if (mode.equals(PLAIN)) {
@@ -639,24 +645,29 @@ public class WaTool {
                                                     aSpeaker.smartPrintResult(true, "Name:{"
                                                             + uec2.getNameTagValueEc2(i.tags()) + "}, " + i.instanceId()
                                                             + ", " + i.instanceType() + ", sriov:"
-                                                            + (i.sriovNetSupport() == null ? "n/a" : i.sriovNetSupport())
+                                                            + (i.sriovNetSupport() == null ? "n/a"
+                                                                    : i.sriovNetSupport())
                                                             + ", ena:" + i.enaSupport() + ", " + i.state().name() + ", "
                                                             + i.privateIpAddress() + ", "
-                                                            + (i.publicIpAddress() == null ? "n/a" : i.publicIpAddress()));
+                                                            + (i.publicIpAddress() == null ? "n/a"
+                                                                    : i.publicIpAddress()));
                                                 } else {
                                                     aSpeaker.smartPrintResult(true,
                                                             "Name:{" + uec2.getNameTagValueEc2(i.tags()) + "}, "
-                                                                    + i.instanceId() + ", " + i.instanceType() + ", sriov:"
+                                                                    + i.instanceId() + ", " + i.instanceType()
+                                                                    + ", sriov:"
                                                                     + (i.sriovNetSupport() == null ? "n/a"
                                                                             : i.sriovNetSupport())
-                                                                    + ", ena:" + i.enaSupport() + ", " + i.state().name()
-                                                                    + ", " + hp.redactIp(i.privateIpAddress()) + ", "
+                                                                    + ", ena:" + i.enaSupport() + ", "
+                                                                    + i.state().name() + ", "
+                                                                    + hp.redactIp(i.privateIpAddress()) + ", "
                                                                     + (i.publicIpAddress() == null ? "n/a"
                                                                             : hp.redactIp(i.publicIpAddress())));
                                                 }
                                                 for (NetworkInterface eni : enisInVpc) {
                                                     Speaker eniSpeaker = aSpeaker.clone();
-                                                    if (eni.attachment() != null && eni.attachment().instanceId() != null
+                                                    if (eni.attachment() != null
+                                                            && eni.attachment().instanceId() != null
                                                             && eni.attachment().instanceId().equals(i.instanceId())) {
                                                         eniSpeaker.smartPrintResult(true,
                                                                 "eni-" + eni.attachment().deviceIndex() + ": "
@@ -713,9 +724,9 @@ public class WaTool {
                 // -------------------- Begin Lambda
                 vSpeaker.printTitle("Lambda:");
                 int lCount = 0;
-                //List<FunctionConfiguration> fcs = lambda.listFunctions().functions();
+                // List<FunctionConfiguration> fcs = lambda.listFunctions().functions();
                 Iterator<ListFunctionsResponse> iterFcs = lambda.listFunctionsPaginator().iterator();
-                while(iterFcs.hasNext()){
+                while (iterFcs.hasNext()) {
                     List<FunctionConfiguration> fcs = iterFcs.next().functions();
                     for (FunctionConfiguration fc : fcs) {
                         Speaker fSpeaker = vSpeaker.clone();
@@ -726,18 +737,15 @@ public class WaTool {
                                                 + fc.functionArn() + ", " + fc.version() + ", runtime:" + fc.runtime()
                                                 + ", handler:" + fc.handler() + ", mem:" + fc.memorySize() + "m, ttl:"
                                                 + fc.timeout() + "s");
+                                fSpeaker.printResult(true, "role: " + fc.role());
                             } else {
                                 fSpeaker.smartPrintResult(true,
                                         Speaker.LAMBDA + " LAMBDA-" + (++lCount) + ": " + fc.functionName() + ", "
                                                 + hp.redactArn(fc.functionArn()) + ", " + fc.version() + ", runtime:"
-                                                + fc.runtime() + ", handler:" + fc.handler() + ", mem:" + fc.memorySize()
-                                                + "m, ttl:" + fc.timeout() + "s");
-							}
-							if(mode.equals(PLAIN)){
-								fSpeaker.printResult(true, "role: " + fc.role());
-							} else {
-								fSpeaker.printResult(true, "role: " + hp.redactArn(fc.role()));
-							}
+                                                + fc.runtime() + ", handler:" + fc.handler() + ", mem:"
+                                                + fc.memorySize() + "m, ttl:" + fc.timeout() + "s");
+                                fSpeaker.printResult(true, "role: " + hp.redactArn(fc.role()));
+                            }
                             fSpeaker.printResult(true,
                                     "protected-by: " + uec2.decodeSgsByIds(ec2, fc.vpcConfig().securityGroupIds()));
                             fSpeaker.printResult(true, uec2.decodeSubnetsById(ec2, fc.vpcConfig().subnetIds()));
@@ -751,8 +759,10 @@ public class WaTool {
                 int mdCount = 0;
                 int rdCount = 0;
                 Map<String, String> cacheSubnetGroupNameToSubnetAzs = new Hashtable<String, String>();
-                Iterator<DescribeCacheSubnetGroupsResponse> iterCacheSubnetGroups = cache.describeCacheSubnetGroupsPaginator(DescribeCacheSubnetGroupsRequest.builder().build()).iterator();
-                while(iterCacheSubnetGroups.hasNext()){
+                Iterator<DescribeCacheSubnetGroupsResponse> iterCacheSubnetGroups = cache
+                        .describeCacheSubnetGroupsPaginator(DescribeCacheSubnetGroupsRequest.builder().build())
+                        .iterator();
+                while (iterCacheSubnetGroups.hasNext()) {
                     List<CacheSubnetGroup> cacheSubnetGroups = iterCacheSubnetGroups.next().cacheSubnetGroups();
                     for (CacheSubnetGroup csg : cacheSubnetGroups) {
                         if (csg.vpcId().equals(vpc.vpcId())) {
@@ -763,8 +773,9 @@ public class WaTool {
                 }
                 String repGroupId = null;
                 String cddGroupId = null;
-                Iterator<DescribeCacheClustersResponse> iterCacheClusters = cache.describeCacheClustersPaginator().iterator();
-                while(iterCacheClusters.hasNext()){
+                Iterator<DescribeCacheClustersResponse> iterCacheClusters = cache.describeCacheClustersPaginator()
+                        .iterator();
+                while (iterCacheClusters.hasNext()) {
                     List<CacheCluster> cacheClusters = iterCacheClusters.next().cacheClusters();
                     for (CacheCluster cc : cacheClusters) {
                         Speaker ccSpeaker = vSpeaker.clone();
@@ -774,17 +785,15 @@ public class WaTool {
                             cddGroupId = cc.replicationGroupId();
                             if (repGroupId == null || !cddGroupId.equals(repGroupId)) {
                                 repGroupId = cddGroupId;
-                                ReplicationGroup rg = cache.describeReplicationGroups(
-                                        DescribeReplicationGroupsRequest.builder().replicationGroupId(repGroupId).build())
-                                        .replicationGroups().get(0);
-                                ccSpeaker.smartPrintResult(true,
-                                        "REDIS-" + (++rdCount) + ": " + rg.replicationGroupId() + ", " + cc.engine() + ", "
-                                                + cc.engineVersion() + ", " + rg.cacheNodeType() + ", "
-                                                + cc.cacheClusterStatus() + ", atRestEnc:" + cc.atRestEncryptionEnabled()
-                                                + ", transitEnc:" + cc.transitEncryptionEnabled()
-                                                + (rg.nodeGroups().size() == 0 ? ""
-                                                        : ", shard:" + rg.nodeGroups().size() + ", replica:"
-                                                                + rg.nodeGroups().get(0).nodeGroupMembers().size()));
+                                ReplicationGroup rg = cache.describeReplicationGroups(DescribeReplicationGroupsRequest
+                                        .builder().replicationGroupId(repGroupId).build()).replicationGroups().get(0);
+                                ccSpeaker.smartPrintResult(true, "REDIS-" + (++rdCount) + ": " + rg.replicationGroupId()
+                                        + ", " + cc.engine() + ", " + cc.engineVersion() + ", " + rg.cacheNodeType()
+                                        + ", " + cc.cacheClusterStatus() + ", atRestEnc:" + cc.atRestEncryptionEnabled()
+                                        + ", transitEnc:" + cc.transitEncryptionEnabled()
+                                        + (rg.nodeGroups().size() == 0 ? ""
+                                                : ", shard:" + rg.nodeGroups().size() + ", replica:"
+                                                        + rg.nodeGroups().get(0).nodeGroupMembers().size()));
                                 if (rg.configurationEndpoint() != null) {
                                     if (mode.equals(PLAIN)) {
                                         ccSpeaker.printResult(true, "endpoint: " + rg.configurationEndpoint().address()
@@ -805,14 +814,16 @@ public class WaTool {
                             }
                         } else if (engine.equals("memcached")
                                 && cacheSubnetGroupNameToSubnetAzs.containsKey(cc.cacheSubnetGroupName())) {
-                            ccSpeaker.smartPrintResult(true, "MEMCACHED-" + (++mdCount) + ": " + cc.cacheClusterId() + ", "
-                                    + cc.engine() + ", " + cc.engineVersion() + ", " + cc.cacheNodeType() + ", "
-                                    + cc.cacheClusterStatus() + ", atRestEnc:" + cc.atRestEncryptionEnabled()
-                                    + ", transitEnc:" + cc.transitEncryptionEnabled() + ", nodes: " + cc.numCacheNodes());
+                            ccSpeaker.smartPrintResult(true,
+                                    "MEMCACHED-" + (++mdCount) + ": " + cc.cacheClusterId() + ", " + cc.engine() + ", "
+                                            + cc.engineVersion() + ", " + cc.cacheNodeType() + ", "
+                                            + cc.cacheClusterStatus() + ", atRestEnc:" + cc.atRestEncryptionEnabled()
+                                            + ", transitEnc:" + cc.transitEncryptionEnabled() + ", nodes: "
+                                            + cc.numCacheNodes());
                             if (cc.configurationEndpoint() != null) {
                                 if (mode.equals(PLAIN)) {
-                                    ccSpeaker.printResult(true, "endpoint: " + cc.configurationEndpoint().address() + ":"
-                                            + cc.configurationEndpoint().port());
+                                    ccSpeaker.printResult(true, "endpoint: " + cc.configurationEndpoint().address()
+                                            + ":" + cc.configurationEndpoint().port());
                                 } else {
                                     ccSpeaker.printResult(true,
                                             "endpoint: " + hp.redact(cc.configurationEndpoint().address() + ":"
@@ -834,13 +845,14 @@ public class WaTool {
                 vSpeaker.printTitle("RDS:");
                 int rdsCount = 0;
                 Iterator<DescribeDbInstancesResponse> iterRdss = rds.describeDBInstancesPaginator().iterator();
-                while(iterRdss.hasNext()){
+                while (iterRdss.hasNext()) {
                     List<DBInstance> rdss = iterRdss.next().dbInstances();
                     for (DBInstance instance : rdss) {
                         Speaker rdsSpeaker = vSpeaker.clone();
                         String oneSgId = instance.vpcSecurityGroups().get(0).vpcSecurityGroupId();
                         String oneVpcId = ec2
-                                .describeSecurityGroups(DescribeSecurityGroupsRequest.builder().groupIds(oneSgId).build())
+                                .describeSecurityGroups(
+                                        DescribeSecurityGroupsRequest.builder().groupIds(oneSgId).build())
                                 .securityGroups().get(0).vpcId();
                         if (oneVpcId.equals(vpc.vpcId())) {
                             String iops = null;
@@ -853,8 +865,8 @@ public class WaTool {
                                                 + ", DB:" + instance.dbName() + ", " + instance.engine() + ", "
                                                 + instance.engineVersion() + ", status:" + instance.dbInstanceStatus()
                                                 + ", multi-AZ:" + instance.multiAZ() + ", admin:"
-                                                + instance.masterUsername() + ", size:" + instance.allocatedStorage() + "G"
-                                                + ", " + instance.storageType() + ", iops:"
+                                                + instance.masterUsername() + ", size:" + instance.allocatedStorage()
+                                                + "G" + ", " + instance.storageType() + ", iops:"
                                                 + (instance.storageType().equals("gp2") ? iops : instance.iops()));
                             } else {
                                 rdsSpeaker.smartPrintResult(true, Speaker.DB + " RDS-" + (++rdsCount) + ": "
@@ -890,7 +902,7 @@ public class WaTool {
                 vSpeaker.printTitle("Redshift:");
                 int rsCount = 0;
                 Iterator<DescribeClustersResponse> iterRss = rs.describeClustersPaginator().iterator();
-                while(iterRss.hasNext()){
+                while (iterRss.hasNext()) {
                     List<Cluster> rss = iterRss.next().clusters();
                     for (Cluster c : rss) {
                         Speaker rsSpeaker = vSpeaker.clone();
@@ -898,16 +910,16 @@ public class WaTool {
                             if (mode.equals(PLAIN)) {
                                 rsSpeaker.smartPrintResult(true,
                                         Speaker.DB + " REDSHIFT-" + (++rsCount) + ": " + c.clusterIdentifier() + ", "
-                                                + c.numberOfNodes() + " of " + c.nodeType() + ", DB:" + c.dbName() + ", "
-                                                + c.clusterVersion() + ", admin:" + c.masterUsername()
+                                                + c.numberOfNodes() + " of " + c.nodeType() + ", DB:" + c.dbName()
+                                                + ", " + c.clusterVersion() + ", admin:" + c.masterUsername()
                                                 + ", auto-snap-retention:" + c.automatedSnapshotRetentionPeriod()
                                                 + ", status:" + c.clusterStatus() + ", m-status: "
                                                 + (c.modifyStatus() == null ? "n/a" : c.modifyStatus()));
                             } else {
                                 rsSpeaker.smartPrintResult(true,
                                         Speaker.DB + " REDSHIFT-" + (++rsCount) + ": " + c.clusterIdentifier() + ", "
-                                                + c.numberOfNodes() + " of " + c.nodeType() + ", DB:" + c.dbName() + ", "
-                                                + c.clusterVersion() + ", admin:" + hp.redact(c.masterUsername())
+                                                + c.numberOfNodes() + " of " + c.nodeType() + ", DB:" + c.dbName()
+                                                + ", " + c.clusterVersion() + ", admin:" + hp.redact(c.masterUsername())
                                                 + ", auto-snap-retention:" + c.automatedSnapshotRetentionPeriod()
                                                 + ", status:" + c.clusterStatus() + ", m-status: "
                                                 + (c.modifyStatus() == null ? "n/a" : c.modifyStatus()));
@@ -917,8 +929,8 @@ public class WaTool {
                                     rsSpeaker.printResult(true, "endpoint: " + c.endpoint().address() + ":"
                                             + c.endpoint().port() + "/" + c.dbName());
                                 } else {
-                                    rsSpeaker.printResult(true, "endpoint: " + hp
-                                            .redact(c.endpoint().address() + ":" + c.endpoint().port() + "/" + c.dbName()));
+                                    rsSpeaker.printResult(true, "endpoint: " + hp.redact(
+                                            c.endpoint().address() + ":" + c.endpoint().port() + "/" + c.dbName()));
                                 }
                             }
                             rsSpeaker.printResult(true, "protected-by: "
@@ -1013,8 +1025,9 @@ public class WaTool {
                     sSpeaker.printResult(true, "#TTL-NATGW:" + natCount + "\n");
                     // EMR
                     sSpeaker.printTitle("EMR:");
-                    Iterator<software.amazon.awssdk.services.emr.model.ListClustersResponse> iterEmrs = emr.listClustersPaginator().iterator();
-                    while(iterEmrs.hasNext()){
+                    Iterator<software.amazon.awssdk.services.emr.model.ListClustersResponse> iterEmrs = emr
+                            .listClustersPaginator().iterator();
+                    while (iterEmrs.hasNext()) {
                         List<ClusterSummary> css = iterEmrs.next().clusters();
                         for (ClusterSummary cs : css) {
                             if (!cs.status().state().equals(ClusterState.TERMINATED)) {
@@ -1031,7 +1044,8 @@ public class WaTool {
                                     int fA = 0;
                                     for (Application a : c.applications()) {
                                         if (fA == 0) {
-                                            emrSpeaker.printResult(false, "application: " + a.name() + " " + a.version());
+                                            emrSpeaker.printResult(false,
+                                                    "application: " + a.name() + " " + a.version());
                                             fA++;
                                         }
                                         System.out.print(", " + a.name() + " " + a.version());
@@ -1050,106 +1064,112 @@ public class WaTool {
                     }
                     sSpeaker.printResult(true, "#TTL-EMR:" + emrCount + "\n");
                     // EC2
-                    sSpeaker.printTitle("EC2: Auto Scaling = " + Speaker.STAR + "    Auto Recovery = " + Speaker.AUTO_RECOVERY_EC2
-                            + "    NONE-AS-AR = " + Speaker.NONE_ASG_AR_EC2);
+                    sSpeaker.printTitle("EC2: Auto Scaling = " + Speaker.STAR + "    Auto Recovery = "
+                            + Speaker.AUTO_RECOVERY_EC2 + "    NONE-AS-AR = " + Speaker.NONE_ASG_AR_EC2);
                     int subnetEc2Count = 0;
                     Filter vpcInstanceFilter = Filter.builder().name("vpc-id").values(vpc.vpcId()).build();
-                    for (Reservation r : ec2
-                            .describeInstances(DescribeInstancesRequest.builder().filters(vpcInstanceFilter).build())
-                            .reservations()) {
-                        for (Instance i : r.instances()) {
-                            Speaker eSpeaker = sSpeaker.clone();
-                            if (!i.state().name().equals(InstanceStateName.TERMINATED)
-                                    && i.subnetId().equals(s.subnetId())) {
-                                subnetEc2Count++;
-                                if (mode.equals(PLAIN)) {
-                                    eSpeaker.smartPrintResult(true,
-                                            sSpeaker.getIconForEC2InstanceType(i.instanceId(), instanceId2Ec2Type)
-                                                    + "  EC2-" + (++ec2Count) + ": Name:{"
-                                                    + uec2.getNameTagValueEc2(i.tags()) + "}, " + i.instanceId() + ", "
-                                                    + i.instanceType() + ", sriov:"
-                                                    + (i.sriovNetSupport() == null ? "n/a" : i.sriovNetSupport())
-                                                    + ", ena:" + i.enaSupport() + ", " + i.state().name() + ", "
-                                                    + i.privateIpAddress() + ", "
-                                                    + (i.publicIpAddress() == null ? "n/a" : i.publicIpAddress()));
-                                } else {
-                                    eSpeaker.smartPrintResult(true, sSpeaker.getIconForEC2InstanceType(i.instanceId(),
-                                            instanceId2Ec2Type) + "  EC2-" + (++ec2Count) + ": Name:{"
-                                            + uec2.getNameTagValueEc2(i.tags()) + "}, " + i.instanceId() + ", "
-                                            + i.instanceType() + ", sriov:"
-                                            + (i.sriovNetSupport() == null ? "n/a" : i.sriovNetSupport()) + ", ena:"
-                                            + i.enaSupport() + ", " + i.state().name() + ", "
-                                            + hp.redactIp(i.privateIpAddress()) + ", "
-                                            + (i.publicIpAddress() == null ? "n/a" : hp.redactIp(i.publicIpAddress())));
-                                    eSpeaker.printResult(true, "role: " + (i.iamInstanceProfile() == null ? "n/a"
-                                            : hp.redactArn(i.iamInstanceProfile().arn())));
-                                    eSpeaker.printResult(true, "key: " + hp.redact(i.keyName()));
-                                }
-                                Filter ebsFilter = Filter.builder().name("attachment.instance-id")
-                                        .values(i.instanceId()).build();
-                                List<Volume> volumes = ec2
-                                        .describeVolumes(DescribeVolumesRequest.builder().filters(ebsFilter).build())
-                                        .volumes();
-                                for (Volume v : volumes) {
-                                    eSpeaker.printResult(true,
-                                            "ebs: tag-name:" + uec2.getNameTagValueEc2(v.tags()) + ", size:" + v.size()
-                                                    + "G" + ", type:" + v.volumeType() + ", iops:" + v.iops() + ", enc:"
-                                                    + v.encrypted() + ", device:" + v.attachments().get(0).device());
-                                }
-                                for (NetworkInterface eni : enisInVpc) {
-                                    Speaker eniSpeaker = eSpeaker.clone();
-                                    if (eni.attachment() != null && eni.attachment().instanceId() != null
-                                            && eni.attachment().instanceId().equals(i.instanceId())) {
-                                        if (mode.equals(PLAIN)) {
-                                            eniSpeaker.smartPrintResult(true, "eni-" + eni.attachment().deviceIndex()
-                                                    + ": " + eni.interfaceType() + ", " + eni.availabilityZone()
-                                                    + ", primary:{" + eni.privateDnsName() + ", "
-                                                    + eni.privateIpAddress() + ", "
-                                                    + (eni.association() == null ? "n/a"
-                                                            : eni.association().publicDnsName())
-                                                    + ", "
-                                                    + (eni.association() == null ? "n/a" : eni.association().publicIp())
-                                                    + "}");
-                                            eniSpeaker.printResult(true, "protected-by: "
-                                                    + uec2.groupIdentifierToSgTagOrName(ec2, eni.groups()));
-                                            for (NetworkInterfacePrivateIpAddress addr : eni.privateIpAddresses()) {
-                                                eniSpeaker.printResult(true,
-                                                        "address-association: " + addr.privateIpAddress() + ", "
-                                                                + (addr.association() != null
-                                                                        ? addr.association().publicIp()
-                                                                        : "no-public-ip"));
-                                            }
-                                        } else {
-                                            eniSpeaker
-                                                    .smartPrintResult(true,
-                                                            "eni-" + eni.attachment().deviceIndex() + ": "
-                                                                    + eni.interfaceType() + ", "
-                                                                    + eni.availabilityZone() + ", primary:{"
-                                                                    + hp.redact(eni.privateDnsName()) + ", "
-                                                                    + hp.redactIp(eni.privateIpAddress()) + ", "
-                                                                    + (eni.association() == null ? "n/a"
-                                                                            : hp.redact(
-                                                                                    eni.association().publicDnsName()))
-                                                                    + ", "
-                                                                    + (eni.association() == null ? "n/a"
-                                                                            : hp.redactIp(eni.association().publicIp()))
-                                                                    + "}");
-                                            eniSpeaker.printResult(true, "protected-by: "
-                                                    + uec2.groupIdentifierToSgTagOrName(ec2, eni.groups()));
-                                            for (NetworkInterfacePrivateIpAddress addr : eni.privateIpAddresses()) {
-                                                eniSpeaker.printResult(true,
-                                                        "address-association: " + hp.redactIp(addr.privateIpAddress())
+                    Iterator<DescribeInstancesResponse> iterReservations = ec2.describeInstancesPaginator(
+                            DescribeInstancesRequest.builder().filters(vpcInstanceFilter).build()).iterator();
+                    while (iterReservations.hasNext()) {
+                        List<Reservation> ress = iterReservations.next().reservations();
+                        for (Reservation r : ress) {
+                            for (Instance i : r.instances()) {
+                                Speaker eSpeaker = sSpeaker.clone();
+                                if (!i.state().name().equals(InstanceStateName.TERMINATED)
+                                        && i.subnetId().equals(s.subnetId())) {
+                                    subnetEc2Count++;
+                                    if (mode.equals(PLAIN)) {
+                                        eSpeaker.smartPrintResult(true,
+                                                sSpeaker.getIconForEC2InstanceType(i.instanceId(), instanceId2Ec2Type)
+                                                        + "  EC2-" + (++ec2Count) + ": Name:{"
+                                                        + uec2.getNameTagValueEc2(i.tags()) + "}, " + i.instanceId()
+                                                        + ", " + i.instanceType() + ", sriov:"
+                                                        + (i.sriovNetSupport() == null ? "n/a" : i.sriovNetSupport())
+                                                        + ", ena:" + i.enaSupport() + ", " + i.state().name() + ", "
+                                                        + i.privateIpAddress() + ", "
+                                                        + (i.publicIpAddress() == null ? "n/a" : i.publicIpAddress()));
+                                    } else {
+                                        eSpeaker.smartPrintResult(true,
+                                                sSpeaker.getIconForEC2InstanceType(i.instanceId(), instanceId2Ec2Type)
+                                                        + "  EC2-" + (++ec2Count) + ": Name:{"
+                                                        + uec2.getNameTagValueEc2(i.tags()) + "}, " + i.instanceId()
+                                                        + ", " + i.instanceType() + ", sriov:"
+                                                        + (i.sriovNetSupport() == null ? "n/a" : i.sriovNetSupport())
+                                                        + ", ena:" + i.enaSupport() + ", " + i.state().name() + ", "
+                                                        + hp.redactIp(i.privateIpAddress()) + ", "
+                                                        + (i.publicIpAddress() == null ? "n/a"
+                                                                : hp.redactIp(i.publicIpAddress())));
+                                        eSpeaker.printResult(true, "role: " + (i.iamInstanceProfile() == null ? "n/a"
+                                                : hp.redactArn(i.iamInstanceProfile().arn())));
+                                        eSpeaker.printResult(true, "key: " + hp.redact(i.keyName()));
+                                    }
+                                    Filter ebsFilter = Filter.builder().name("attachment.instance-id")
+                                            .values(i.instanceId()).build();
+                                    List<Volume> volumes = ec2
+                                            .describeVolumes(
+                                                    DescribeVolumesRequest.builder().filters(ebsFilter).build())
+                                            .volumes();
+                                    for (Volume v : volumes) {
+                                        eSpeaker.printResult(true,
+                                                "ebs: tag-name:" + uec2.getNameTagValueEc2(v.tags()) + ", size:"
+                                                        + v.size() + "G" + ", type:" + v.volumeType() + ", iops:"
+                                                        + v.iops() + ", enc:" + v.encrypted() + ", device:"
+                                                        + v.attachments().get(0).device());
+                                    }
+                                    for (NetworkInterface eni : enisInVpc) {
+                                        Speaker eniSpeaker = eSpeaker.clone();
+                                        if (eni.attachment() != null && eni.attachment().instanceId() != null
+                                                && eni.attachment().instanceId().equals(i.instanceId())) {
+                                            if (mode.equals(PLAIN)) {
+                                                eniSpeaker.smartPrintResult(true,
+                                                        "eni-" + eni.attachment().deviceIndex() + ": "
+                                                                + eni.interfaceType() + ", " + eni.availabilityZone()
+                                                                + ", primary:{" + eni.privateDnsName() + ", "
+                                                                + eni.privateIpAddress() + ", "
+                                                                + (eni.association() == null ? "n/a"
+                                                                        : eni.association().publicDnsName())
+                                                                + ", " + (eni.association() == null ? "n/a"
+                                                                        : eni.association().publicIp())
+                                                                + "}");
+                                                eniSpeaker.printResult(true, "protected-by: "
+                                                        + uec2.groupIdentifierToSgTagOrName(ec2, eni.groups()));
+                                                for (NetworkInterfacePrivateIpAddress addr : eni.privateIpAddresses()) {
+                                                    eniSpeaker.printResult(true,
+                                                            "address-association: " + addr.privateIpAddress() + ", "
+                                                                    + (addr.association() != null
+                                                                            ? addr.association().publicIp()
+                                                                            : "no-public-ip"));
+                                                }
+                                            } else {
+                                                eniSpeaker.smartPrintResult(true,
+                                                        "eni-" + eni.attachment().deviceIndex() + ": "
+                                                                + eni.interfaceType() + ", " + eni.availabilityZone()
+                                                                + ", primary:{" + hp.redact(eni.privateDnsName()) + ", "
+                                                                + hp.redactIp(eni.privateIpAddress()) + ", "
+                                                                + (eni.association() == null ? "n/a"
+                                                                        : hp.redact(eni.association().publicDnsName()))
                                                                 + ", "
-                                                                + (addr.association() != null
-                                                                        ? hp.redactIp(addr.association().publicIp())
-                                                                        : "no-public-ip"));
+                                                                + (eni.association() == null ? "n/a"
+                                                                        : hp.redactIp(eni.association().publicIp()))
+                                                                + "}");
+                                                eniSpeaker.printResult(true, "protected-by: "
+                                                        + uec2.groupIdentifierToSgTagOrName(ec2, eni.groups()));
+                                                for (NetworkInterfacePrivateIpAddress addr : eni.privateIpAddresses()) {
+                                                    eniSpeaker.printResult(true,
+                                                            "address-association: "
+                                                                    + hp.redactIp(addr.privateIpAddress()) + ", "
+                                                                    + (addr.association() != null
+                                                                            ? hp.redactIp(addr.association().publicIp())
+                                                                            : "no-public-ip"));
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                    } // for EC2
+                        } // for EC2
+                    }
+
                     sSpeaker.printResult(true, "#TTL-SUBNET-EC2:" + subnetEc2Count + "\n");
                 } // for Subnet
                   // -------------------- End Subnet Resources
