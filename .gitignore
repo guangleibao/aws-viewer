@@ -31,3 +31,4 @@ target/
 .settings/
 .vscode/
 countLine.sh
+test.sh

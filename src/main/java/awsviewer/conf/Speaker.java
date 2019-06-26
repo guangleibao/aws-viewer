@@ -49,7 +49,7 @@ public class Speaker implements Serializable{
     public static char EBS = Character.toChars(10064)[0];
     public static char SNAPSHOT = Character.toChars(8748)[0];
     public static char VPC = Character.toChars(9729)[0];
-    public static char ASG = Character.toChars(10012)[0];
+    public static char ASG = Character.toChars(7002)[0];
     public static char LC = Character.toChars(9071)[0];
     public static char DX = Character.toChars(10199)[0];
     public static char DMS = Character.toChars(9100)[0];
@@ -60,6 +60,8 @@ public class Speaker implements Serializable{
     public static char OUTBOUND = Character.toChars(11013)[0];
     public static char INBOUND = Character.toChars(10154)[0];
     public static char R = Character.toChars(9617)[0];
+    public static char CACHE = Character.toChars(8373)[0];
+    public static char ECS = Character.toChars(8845)[0];
 
     private RenderType renderType;
     private String renderTypeName;
