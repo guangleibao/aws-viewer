@@ -120,7 +120,6 @@ import software.amazon.awssdk.services.redshift.model.DescribeClustersResponse;
 
 public class WaTool {
 
-        private final Speaker sk = Speaker.getConsoleInstance(null);
         private final Helper hp = new Helper();
 
         static {
@@ -133,18 +132,27 @@ public class WaTool {
 
                 if (args.length > 0 && args[0].equals("showVpc")) {
                         WaTool wt = new WaTool();
-                        wt.showVpc(args[1], args[2], args[3]);
+                        wt.showVpc(args[1], args[2], args[3], args[4]);
                 } else {
                         System.out.println("Usage:");
                         System.out.println(
-                                        "showVpc <vpc: vpc-name-prefix|vpc-id> <mode: plain|redact> <profile: pick up a profile name which have read permission on vpc resources>");
+                                        "showVpc <vpc: vpc-name-prefix|vpc-id> <mode: plain|redact> <print-mode: console|markdown> <profile: pick up a profile name which have read permission on vpc resources>");
                 }
         }
 
-        public void showVpc(String prefix, String mode, String profile) throws Exception {
+        public void showVpc(String prefix, String mode, String printMode, String profile) throws Exception {
                 // ------------- INIT
                 final String REDACT = "redact";
                 final String PLAIN = "plain";
+                final String CONSOLE = "console";
+                final String MARKDOWN = "markdown";
+                Speaker sk = null;
+                if(printMode.equals(MARKDOWN)){
+                        sk = Speaker.getMdInstance(profile);
+                }
+                else{
+                        sk = Speaker.getConsoleInstance(profile);
+                }
                 General.init(profile);
                 Uec2 uec2 = Uec2.build();
                 Uelasticloadbalancingv2 uelbv2 = Uelasticloadbalancingv2.build();
@@ -152,8 +160,7 @@ public class WaTool {
                 Filter vpcF = uec2.createFilterEc2("tag:Name", prefix + "*");
                 Filter vpcF2 = uec2.createFilterEc2("vpc-id", prefix);
                 Filter[] tries = new Filter[] { vpcF, vpcF2 };
-                Speaker mSpeaker = this.sk.clone();
-                // mSpeaker.smartPrintTitle("Show VPC: ");
+                Speaker mSpeaker = sk.clone();
                 Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, profile);
                 ElasticLoadBalancingClient elb = (ElasticLoadBalancingClient) Clients
                                 .getClientByServiceClass(Clients.ELASTICLOADBALANCING, profile);
@@ -222,7 +229,7 @@ public class WaTool {
                                                                                 + uec2.getNameTagValueEc2(igw.tags())
                                                                                 + "|" + igw.internetGatewayId());
                                         }
-                                        vSpeaker.printResult(true, "#TTL-IGW:" + igwCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-IGW:" + igwCount + "\n");
                                         // -------------------- End IGW
                                         // -------------------- Begin VGW
                                         vSpeaker.printTitle("Virtual Private Gateway:");
@@ -238,7 +245,7 @@ public class WaTool {
                                                                 + vgw.vpnGatewayId() + ", " + vgw.type() + ", ASN:"
                                                                 + vgw.amazonSideAsn() + ", " + vgw.state());
                                         }
-                                        vSpeaker.printResult(true, "#TTL-VGW:" + vgwCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-VGW:" + vgwCount + "\n");
                                         // -------------------- End VGW
                                         // -------------------- Begin Route Table
                                         vSpeaker.printTitle("Route Table:");
@@ -314,7 +321,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-Route-Table:" + rtCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-Route-Table:" + rtCount + "\n");
                                         // -------------------- End Route Table
                                         // -------------------- Begin NACL
                                         vSpeaker.printTitle("Network ACL:");
@@ -352,7 +359,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-NACL:" + naclCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-NACL:" + naclCount + "\n");
                                         // -------------------- End NACL
                                         // -------------------- Begin SG
                                         vSpeaker.printTitle("Security Group:");
@@ -407,7 +414,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-SG:" + sgCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-SG:" + sgCount + "\n");
                                         // -------------------- End SG
                                         // -------------------- Begin ELB v2
                                         vSpeaker.printTitle("Elastic Load Balancing V2 - Application & Network:");
@@ -469,7 +476,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-ELBv2:" + elbv2Count + "\n");
+                                        vSpeaker.printResult(true, "TTL-ELBv2:" + elbv2Count + "\n");
                                         // -------------------- End ELB v2
                                         // -------------------- Begin ELB
                                         vSpeaker.printTitle("Elastic Load Balancing - Classic:");
@@ -530,7 +537,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-ELB:" + elbCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-ELB:" + elbCount + "\n");
                                         // -------------------- End ELB
                                         // -------------------- Begin Endpoint
                                         vSpeaker.printTitle("VPC Endpoint - Gateway & Interface:");
@@ -644,7 +651,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-ENDPOINT:" + vpceCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-ENDPOINT:" + vpceCount + "\n");
                                         // -------------------- End Endpoint
                                         // -------------------- Begin Peering
                                         vSpeaker.printTitle("VPC Peering Connection - Requester & Accepter:");
@@ -692,8 +699,8 @@ public class WaTool {
                                                                         + c.status().message());
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-PEERING-REQ:" + vpcprCount);
-                                        vSpeaker.printResult(true, "#TTL-PEERING-ACC:" + vpcpaCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-PEERING-REQ:" + vpcprCount);
+                                        vSpeaker.printResult(true, "TTL-PEERING-ACC:" + vpcpaCount + "\n");
                                         // -------------------- End Peering
                                         // -------------------- Begin ECS
                                         List<String> validClusterArn = new ArrayList<String>();
@@ -906,7 +913,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-ECS:" + ecsCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-ECS:" + ecsCount + "\n");
                                         // -------------------- End ECS
                                         // -------------------- Begin ES
                                         vSpeaker.printTitle("ElasticSearch:");
@@ -959,7 +966,7 @@ public class WaTool {
                                                                         esde.vpcOptions().subnetIds()));
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-ES:" + esCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-ES:" + esCount + "\n");
                                         // -------------------- End ES
                                         // -------------------- Begin Lambda
                                         vSpeaker.printTitle("Lambda:");
@@ -1007,7 +1014,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-LAMBDA:" + lCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-LAMBDA:" + lCount + "\n");
                                         // -------------------- End Lambda
                                         // -------------------- Begin ElastiCache
                                         vSpeaker.printTitle("ElastiCache:");
@@ -1152,8 +1159,8 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-MEMCACHE:" + mdCount);
-                                        vSpeaker.printResult(true, "#TTL-REDIS:" + rdCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-MEMCACHE:" + mdCount);
+                                        vSpeaker.printResult(true, "TTL-REDIS:" + rdCount + "\n");
                                         // -------------------- End EalstiCache
                                         // -------------------- Begin RDS
                                         vSpeaker.printTitle("RDS:");
@@ -1261,7 +1268,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-RDS:" + rdsCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-RDS:" + rdsCount + "\n");
                                         // -------------------- End RDS
                                         // -------------------- Begin Redshfit
                                         vSpeaker.printTitle("Redshift:");
@@ -1341,7 +1348,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-REDSHIFT:" + rsCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-REDSHIFT:" + rsCount + "\n");
                                         // -------------------- End Redshift
                                         // -------------------- Begin Silent Instance Status Check Markers
                                         Hashtable<String, String> instanceId2Ec2Type = new Hashtable<String, String>();
@@ -1406,7 +1413,7 @@ public class WaTool {
                                                         }
                                                 }
                                         }
-                                        vSpeaker.printResult(true, "#TTL-ASG:" + asgCount + "\n");
+                                        vSpeaker.printResult(true, "TTL-ASG:" + asgCount + "\n");
                                         // -------------------- End Auto Scaling Group
                                         // -------------------- Begin Subnet Resources
                                         int ec2Count = 0;
@@ -1441,7 +1448,7 @@ public class WaTool {
                                                                         + (nat.provisionedBandwidth() == null ? "n/a"
                                                                                         : nat.provisionedBandwidth()));
                                                 }
-                                                sSpeaker.printResult(true, "#TTL-NATGW:" + natCount + "\n");
+                                                sSpeaker.printResult(true, "TTL-NATGW:" + natCount + "\n");
                                                 // EMR
                                                 sSpeaker.printTitle("EMR:");
                                                 Iterator<software.amazon.awssdk.services.emr.model.ListClustersResponse> iterEmrs = emr
@@ -1462,7 +1469,7 @@ public class WaTool {
                                                                                         .ec2SubnetId();
                                                                         if (ec2SnId.equals(s.subnetId())) {
                                                                                 Speaker emrSpeaker = sSpeaker.clone();
-                                                                                emrSpeaker.smartPrintResult(true, "EMR-"
+                                                                                emrSpeaker.smartPrintResult(true, Speaker.EMR+" EMR-"
                                                                                                 + (++emrCount) + ": "
                                                                                                 + cs.name() + ", "
                                                                                                 + cs.id() + ", release:"
@@ -1505,11 +1512,9 @@ public class WaTool {
                                                                 }
                                                         }
                                                 }
-                                                sSpeaker.printResult(true, "#TTL-EMR:" + emrCount + "\n");
+                                                sSpeaker.printResult(true, "TTL-EMR:" + emrCount + "\n");
                                                 // EC2
-                                                sSpeaker.printTitle("EC2: Auto Scaling = " + Speaker.STAR
-                                                                + "    Auto Recovery = " + Speaker.AUTO_RECOVERY_EC2
-                                                                + "    NONE-AS-AR = " + Speaker.NONE_ASG_AR_EC2);
+                                                sSpeaker.printTitle("EC2: Auto Scaling = " + Speaker.STAR+" , Auto Recovery = " + Speaker.AUTO_RECOVERY_EC2+" , NONE-AS-AR = " + Speaker.NONE_ASG_AR_EC2);
                                                 int subnetEc2Count = 0;
                                                 Filter vpcInstanceFilter = Filter.builder().name("vpc-id")
                                                                 .values(vpc.vpcId()).build();
@@ -1744,14 +1749,13 @@ public class WaTool {
                                                         } // for EC2
                                                 }
 
-                                                sSpeaker.printResult(true, "#TTL-SUBNET-EC2:" + subnetEc2Count + "\n");
+                                                sSpeaker.printResult(true, "TTL-SUBNET-EC2:" + subnetEc2Count + "\n");
                                         } // for Subnet
                                           // -------------------- End Subnet Resources
-                                        vSpeaker.printResult(true, "#TTL-VPC-EC2:" + ec2Count + "\n");
+                                        vSpeaker.printResult(true, "TTL-VPC-EC2:" + ec2Count + "\n");
                                         vSpeaker.smartPrintTitle("End VPC: " + vpcName);
                                 } // End VPC
                         }
                 }
         }
-
 }
