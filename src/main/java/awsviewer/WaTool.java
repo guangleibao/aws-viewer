@@ -92,12 +92,6 @@ import software.amazon.awssdk.services.elasticache.model.ReplicationGroup;
 import software.amazon.awssdk.services.elasticloadbalancing.ElasticLoadBalancingClient;
 import software.amazon.awssdk.services.elasticloadbalancing.model.ListenerDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.AvailabilityZone;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersRequest;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticsearch.ElasticsearchClient;
 import software.amazon.awssdk.services.elasticsearch.model.DescribeElasticsearchDomainRequest;
 import software.amazon.awssdk.services.elasticsearch.model.DomainInfo;
@@ -145,7 +139,7 @@ public class WaTool {
         }
 
         public void showVpc(String prefix, String mode, String printMode, String profile) throws Exception {
-                // ------------- INIT
+                // ------------- INIT, remove following four constants after routines been moved into Uxxx classes.
                 final String REDACT = "redact";
                 final String PLAIN = "plain";
                 final String CONSOLE = "console";
@@ -183,9 +177,6 @@ public class WaTool {
                                 profile);
                 CloudWatchClient cw = (CloudWatchClient) Clients.getClientByServiceClass(Clients.CLOUDWATCH, profile);
                 // -------------- Begin VPC
-                // List<Vpc> vpcs =
-                // ec2.describeVpcs(DescribeVpcsRequest.builder().filters(vpcF).build()).vpcs();
-                // VPC Paginator
                 for (Filter f : tries) {
                         Iterator<DescribeVpcsResponse> iterVpcs = ec2
                                         .describeVpcsPaginator(DescribeVpcsRequest.builder().filters(f).build())
