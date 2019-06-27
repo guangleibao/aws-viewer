@@ -140,6 +140,10 @@ public class WaTool {
                 }
         }
 
+        public void showVpcV2(String prefix, String mode, String printMode, String profile) throws Exception{
+
+        }
+
         public void showVpc(String prefix, String mode, String printMode, String profile) throws Exception {
                 // ------------- INIT
                 final String REDACT = "redact";
@@ -416,68 +420,7 @@ public class WaTool {
                                         }
                                         vSpeaker.printResult(true, "TTL-SG:" + sgCount + "\n");
                                         // -------------------- End SG
-                                        // -------------------- Begin ELB v2
-                                        vSpeaker.printTitle("Elastic Load Balancing V2 - Application & Network:");
-                                        int elbv2Count = 0;
-                                        // List<LoadBalancer> lbv2s =
-                                        // elbv2.describeLoadBalancers(DescribeLoadBalancersRequest.builder().build()).loadBalancers();
-                                        Iterator<DescribeLoadBalancersResponse> iterLbv2s = elbv2
-                                                        .describeLoadBalancersPaginator(
-                                                                        DescribeLoadBalancersRequest.builder().build())
-                                                        .iterator();
-                                        while (iterLbv2s.hasNext()) {
-                                                List<LoadBalancer> lbv2s = iterLbv2s.next().loadBalancers();
-                                                for (LoadBalancer l2 : lbv2s) {
-                                                        Speaker lbv2Speaker = vSpeaker.clone();
-                                                        if (l2.vpcId().equals(vpc.vpcId())) {
-                                                                List<AvailabilityZone> azs = l2.availabilityZones();
-                                                                List<Listener> ls = elbv2.describeListeners(
-                                                                                DescribeListenersRequest.builder()
-                                                                                                .loadBalancerArn(l2
-                                                                                                                .loadBalancerArn())
-                                                                                                .build())
-                                                                                .listeners();
-                                                                if (mode.equals(PLAIN)) {
-                                                                        lbv2Speaker.smartPrintResult(true, Speaker.ELB
-                                                                                        + " ELB-" + (++elbv2Count) + "-"
-                                                                                        + l2.type() + ": "
-                                                                                        + l2.loadBalancerName() + ", "
-                                                                                        + l2.schemeAsString() + ", "
-                                                                                        + l2.ipAddressTypeAsString()
-                                                                                        + ", "
-                                                                                        + l2.state().codeAsString()
-                                                                                        + ", " + l2.dnsName());
-                                                                        lbv2Speaker.smartPrintResult(true,
-                                                                                        uec2.decodeElbv2AZs(ec2, azs));
-                                                                } else {
-                                                                        lbv2Speaker.smartPrintResult(true, Speaker.ELB
-                                                                                        + " ELB-" + (++elbv2Count) + "-"
-                                                                                        + l2.type() + ": "
-                                                                                        + l2.loadBalancerName() + ", "
-                                                                                        + l2.schemeAsString() + ", "
-                                                                                        + l2.ipAddressTypeAsString()
-                                                                                        + ", "
-                                                                                        + l2.state().codeAsString()
-                                                                                        + ", dns: "
-                                                                                        + hp.redact(l2.dnsName()));
-                                                                        lbv2Speaker.smartPrintResult(true,
-                                                                                        uec2.decodeElbv2AZs(ec2, azs));
-                                                                }
-                                                                for (Listener l : ls) {
-                                                                        lbv2Speaker.printResult(true, "listener: "
-                                                                                        + l.protocolAsString() + ", "
-                                                                                        + l.port() + ", ssl:"
-                                                                                        + l.sslPolicy());
-                                                                }
-                                                                lbv2Speaker.printResult(true, uelbv2.getAttributes(
-                                                                                elbv2, l2.loadBalancerArn(), 0, 3));
-                                                                lbv2Speaker.printResult(true, uelbv2.getAttributes(
-                                                                                elbv2, l2.loadBalancerArn(), 3, 100));
-                                                        }
-                                                }
-                                        }
-                                        vSpeaker.printResult(true, "TTL-ELBv2:" + elbv2Count + "\n");
-                                        // -------------------- End ELB v2
+                                        uelbv2.printVpcResource(elbv2, tries, "OR", mode, vSpeaker); // ELBv2
                                         // -------------------- Begin ELB
                                         vSpeaker.printTitle("Elastic Load Balancing - Classic:");
                                         int elbCount = 0;
