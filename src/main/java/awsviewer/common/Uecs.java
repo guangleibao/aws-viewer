@@ -119,7 +119,6 @@ public class Uecs implements CUtil {
                 }
             }
         }
-        //System.out.println(validClusterArn.toString());
         Iterator<ListClustersResponse> iterClustersRound2 = ecs
                 .listClustersPaginator(ListClustersRequest.builder().build()).iterator();
         while (iterClustersRound2.hasNext()) {
