@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import awsviewer.common.Uautoscaling;
 import awsviewer.common.Uec2;
 import awsviewer.common.Uecs;
 import awsviewer.common.Uelasticache;
@@ -174,6 +175,8 @@ public class WaTool {
                 vpcUtil.add(urds);
                 Uredshift urs = Uredshift.build();
                 vpcUtil.add(urs);
+                Uautoscaling uasg = Uautoscaling.build();
+                vpcUtil.add(uasg);
 
                 // Define VPCs
                 Filter vpcF = uec2.createFilterEc2("tag:Name", prefix + "*");
@@ -207,7 +210,7 @@ public class WaTool {
                                         uec2.populateSubnetsInVpc(ec2, subnetF);
                                         uec2.populateEnisInVpc(ec2, eniF);
                                         uec2.populateSubnetToRouteTable(ec2, routeTableF);
-                                        uec2.populateInstanceId2Ec2Type(cw);
+                                        uec2.populateInstanceId2Ec2ARType(cw);
                                         vSpeaker.setUec2(uec2);
                                         // -------------------- End Common
 

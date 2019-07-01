@@ -15,6 +15,9 @@ import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.Tag;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.Vpc;
 
 public class Uautoscaling implements CUtil {
 
@@ -49,8 +52,31 @@ public class Uautoscaling implements CUtil {
 
     @Override
     public void printVpcResource(String andOrOr, String mode, Speaker skBranch,
-            software.amazon.awssdk.services.ec2.model.Filter... filters) {
-        
+            software.amazon.awssdk.services.ec2.model.Filter... filters) throws Exception{
+                Speaker mSpeaker = skBranch.clone();
+        AutoScalingClient asg = (AutoScalingClient) Clients.getClientByServiceClass(Clients.AUTOSCALING, mSpeaker.getProfile());
+        Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, mSpeaker.getProfile());
+        Uec2 uec2 = skBranch.getUec2();
+        Iterator<DescribeVpcsResponse> iterVpcs = null;
+        if (andOrOr.equals("OR")) {
+            for (software.amazon.awssdk.services.ec2.model.Filter f : filters) {
+                iterVpcs = ec2.describeVpcsPaginator(DescribeVpcsRequest.builder().filters(f).build()).iterator();
+                while (iterVpcs.hasNext()) {
+                    List<Vpc> vpcs = iterVpcs.next().vpcs();
+                    for (Vpc vpc : vpcs) {
+                        this.printVpcAsg(asg, ec2, uec2, vpc.vpcId(), mSpeaker);
+                    }
+                }
+            }
+        } else if (andOrOr.equals("AND")) {
+            iterVpcs = ec2.describeVpcsPaginator(DescribeVpcsRequest.builder().filters(filters).build()).iterator();
+            while (iterVpcs.hasNext()) {
+                List<Vpc> vpcs = iterVpcs.next().vpcs();
+                for (Vpc vpc : vpcs) {
+                    this.printVpcAsg(asg, ec2, uec2, vpc.vpcId(), mSpeaker);
+                }
+            }
+        }
     }
 
     public void printVpcAsg(AutoScalingClient asg, Ec2Client ec2, Uec2 uec2, String vpcId, Speaker skBranch){

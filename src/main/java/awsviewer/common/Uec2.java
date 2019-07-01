@@ -118,7 +118,7 @@ public class Uec2 implements CUtil {
         return this.enisInVpc;
     }
 
-    public void populateInstanceId2Ec2Type(CloudWatchClient cw) {
+    public void populateInstanceId2Ec2ARType(CloudWatchClient cw) {
         Iterator<MetricAlarm> iterAlarms = cw.describeAlarmsPaginator(DescribeAlarmsRequest.builder().build())
                 .metricAlarms().iterator();
         MetricAlarm ma = null;
