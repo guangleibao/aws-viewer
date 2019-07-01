@@ -211,10 +211,15 @@ public class Uec2 implements CUtil {
                 List<Volume> volumes = ec2.describeVolumes(DescribeVolumesRequest.builder().filters(ebsFilter).build())
                         .volumes();
                 for (Volume v : volumes) {
+                    Filter ssFilter = Filter.builder().name("volume-id").values(v.volumeId()).build();
+                    List<Snapshot> ss = ec2
+                            .describeSnapshots(DescribeSnapshotsRequest.builder().filters(ssFilter).build())
+                            .snapshots();
                     iSpeaker.printResult(true,
                             "ebs: tag-name:" + this.getNameTagValueEc2(v.tags()) + ", size:" + v.size() + "G"
-                                    + ", type:" + v.volumeType() + ", iops:" + v.iops() + ", device:"
-                                    + v.attachments().get(0).device());
+                                    + ", type:" + v.volumeType() + ", iops:" + v.iops() + ", enc:" + v.encrypted()
+                                    + ", device:" + v.attachments().get(0).device() + ", snapshot:"
+                                    + ((ss.size() == 0) ? "NO" : "YES"));
                 }
                 for (NetworkInterface eni : enisInRegion) {
                     Speaker eniSpeaker = iSpeaker.clone();
