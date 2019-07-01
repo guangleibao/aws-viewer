@@ -119,6 +119,9 @@ public class Uec2 implements CUtil {
     }
 
     public void populateInstanceId2Ec2ARType(CloudWatchClient cw) {
+        this.instanceId2Ec2Type.put("ASG","0");
+        this.instanceId2Ec2Type.put("AR","0");
+        this.instanceId2Ec2Type.put("NONE-ASG-AR","0");
         Iterator<MetricAlarm> iterAlarms = cw.describeAlarmsPaginator(DescribeAlarmsRequest.builder().build())
                 .metricAlarms().iterator();
         MetricAlarm ma = null;

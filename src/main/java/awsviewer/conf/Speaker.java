@@ -544,9 +544,14 @@ public class Speaker implements Serializable{
         char ret = Speaker.NONE_ASG_AR_EC2;
         if(ec2Type!=null && ec2Type.equals("ASG")){
             ret = Speaker.STAR;
+            instanceId2Ec2Type.put("ASG",String.valueOf(Integer.parseInt(instanceId2Ec2Type.get("ASG"))+1));
         }
         else if(ec2Type!=null && ec2Type.equals("AR")){
             ret = Speaker.AUTO_RECOVERY_EC2;
+            instanceId2Ec2Type.put("AR",String.valueOf(Integer.parseInt(instanceId2Ec2Type.get("AR"))+1));
+        }
+        else{
+            instanceId2Ec2Type.put("NONE-ASG-AR",String.valueOf(Integer.parseInt(instanceId2Ec2Type.get("NONE-ASG-AR"))+1));
         }
         return ret;
     }

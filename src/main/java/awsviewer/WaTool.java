@@ -244,7 +244,10 @@ public class WaTool {
                                                 ttlEc2 = ttlEc2 + uec2.printSubnetToolkit(ec2, emr, vpc.vpcId(),
                                                                 s.subnetId(), mode, sSpeaker);
                                         }
-                                        vSpeaker.smartPrintTitleRestrict("End VPC: " + vpcName+", TTL EC2: "+ttlEc2);
+                                        vSpeaker.smartPrintTitleRestrict("End VPC: " + vpcName+", TTL EC2: "+ttlEc2+", In ASG:"+
+                    uec2.getInstanceId2Ec2Type().get("ASG")+", Protected by Auto Recovery:"+
+                    uec2.getInstanceId2Ec2Type().get("AR")+", NONE-ASG-AR:"+
+                    uec2.getInstanceId2Ec2Type().get("NONE-ASG-AR"));
                                 } // End VPC
                         }
                 }
