@@ -110,7 +110,7 @@ public class Uautoscaling implements CUtil {
                 }
             }
         }
-        vSpeaker.printResult(true, "TTL-ASG:" + asgCount + "\n");
+        vSpeaker.printResultParseDetailsClose(true, "TTL-ASG:" + asgCount + "\n");
         // -------------------- End Auto Scaling Group
     }
 

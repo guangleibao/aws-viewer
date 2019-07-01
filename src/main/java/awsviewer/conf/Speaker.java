@@ -75,6 +75,8 @@ public class Speaker implements Serializable{
     
     private int titleLevel = 0;
     private int resultLevel = 0;
+
+    private boolean detailsOpen = false;
     
     public String getProfile() {
 		return this.profile;
@@ -90,6 +92,14 @@ public class Speaker implements Serializable{
 
     public void setUec2(Uec2 uec2){
         this.uec2 = uec2;
+    }
+
+    public void setDetailsOpen(boolean detailsOpen){
+        this.detailsOpen = detailsOpen;
+    }
+
+    public boolean isDetailsOpen(){
+        return this.detailsOpen;
     }
 
 	private static final String NEWLINE_WEB = "<br>";
@@ -236,8 +246,6 @@ public class Speaker implements Serializable{
         }
     }
 
-    
-    
     /**
      * Return the formtted title, and set the chrome symbol, and set the indent content.
      * @param content       The title content.
@@ -248,7 +256,14 @@ public class Speaker implements Serializable{
     public String makeTitle(int indentCount, String symbol, String content) {
         String ret = null;
         if (this.renderType.equals(RenderType.MD)) {
-            ret = Speaker.MD_TITLE_LEVEL[this.titleLevel] + content;
+            String titlePrefix = Speaker.MD_TITLE_LEVEL[this.titleLevel];
+            if(titlePrefix.length()>3){
+                ret = "<details><summary>**"+content+"**</summary>";
+                this.detailsOpen = true;
+            }
+            else{
+                ret =  titlePrefix + content;
+            }
         } else {
             this.symbol = symbol;
             String CR = this.newLine;
@@ -309,6 +324,48 @@ public class Speaker implements Serializable{
         this.titleLevel++;
     }
 
+    public void smartPrintTitleRestrict(String content) {
+        this.printTitleRestrict(this.titleLevel, content);
+        this.titleLevel++;
+    }
+
+    public void printTitleRestrict(int indentCount, String content){
+    	System.out.println(this.makeTitleRestrict(indentCount, content));
+    }
+
+    public String makeTitleRestrict(int indentCount, String content) {
+        return makeTitleRestrict(indentCount, this.symbol, content);
+    }
+
+    public String makeTitleRestrict(int indentCount, String symbol, String content) {
+        String ret = null;
+        if (this.renderType.equals(RenderType.MD)) {
+            String titlePrefix = Speaker.MD_TITLE_LEVEL[this.titleLevel];
+            ret =  titlePrefix + content;
+        } else {
+            this.symbol = symbol;
+            String CR = this.newLine;
+            String space = null;
+            if (this.renderType == RenderType.CONSOLE) {
+                space = INDENT_CONSOLE_TITLE;
+            } else {
+                space = this.indent;
+            }
+            int contentLength = content.length();
+            final int ceilingLength = 10 + contentLength;
+            String ceil = makeTitlePrefix(this.symbol, ceilingLength, indentCount);
+            String leading = makeTitlePrefix(this.symbol, 2, indentCount);
+            String tail = makeTitlePrefix(this.symbol, 2, 0);
+            String centerContent = leading + space + content + space + tail.trim();
+            if (this.renderType.equals(RenderType.WEB)) {
+                ret = centerContent + CR;
+            } else {
+                ret = ceil + CR + centerContent + CR + ceil + CR;
+            }
+        }
+        return this.newLine + ret;
+    }
+
     /**
      * Print title in the current level.
      */
@@ -328,6 +385,7 @@ public class Speaker implements Serializable{
     	s.setNewLine(this.getNewLine());
         s.setRenderType(this.getRenderType());
         s.setUec2(this.getUec2());
+        s.setDetailsOpen(this.isDetailsOpen());
     	return s;
     }
     
@@ -431,6 +489,17 @@ public class Speaker implements Serializable{
      */
     public <E> void printResult(boolean withNewLine, E e) {
     	this.printResult(this.resultLevel, withNewLine, e);
+    }
+
+    /**
+     * Parsing details should be closed or not version of "printResult".
+     */
+    public <E> void printResultParseDetailsClose(boolean withNewLine, E e){
+        if(this.detailsOpen){
+            System.out.println("</details>");
+            this.detailsOpen = false;
+        }
+        this.printResult(this.resultLevel, withNewLine, e);
     }
     
     /**

@@ -99,7 +99,7 @@ public class Uredshift implements CUtil {
                 }
             }
         }
-        vSpeaker.printResult(true, "TTL-REDSHIFT:" + rsCount + "\n");
+        vSpeaker.printResultParseDetailsClose(true, "TTL-REDSHIFT:" + rsCount + "\n");
         // -------------------- End Redshift
     }
 

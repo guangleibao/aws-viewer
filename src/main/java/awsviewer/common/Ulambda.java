@@ -88,7 +88,7 @@ public class Ulambda implements CUtil {
                 }
             }
         }
-        vSpeaker.printResult(true, "TTL-LAMBDA:" + lCount + "\n");
+        vSpeaker.printResultParseDetailsClose(true, "TTL-LAMBDA:" + lCount + "\n");
         // -------------------- End Lambda
     }
 

@@ -118,7 +118,7 @@ public class Urds implements CUtil {
                 }
             }
         }
-        vSpeaker.printResult(true, "TTL-RDS:" + rdsCount + "\n");
+        vSpeaker.printResultParseDetailsClose(true, "TTL-RDS:" + rdsCount + "\n");
         // -------------------- End RDS
     }
 

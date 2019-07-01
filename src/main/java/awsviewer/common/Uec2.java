@@ -352,7 +352,7 @@ public class Uec2 implements CUtil {
             igwSpeaker.smartPrintResult(true, Speaker.GW + " IGW-" + (++igwCount) + ": "
                     + this.getNameTagValueEc2(igw.tags()) + "|" + igw.internetGatewayId());
         }
-        mSpeaker.printResult(true, "TTL-IGW:" + igwCount + "\n");
+        mSpeaker.printResultParseDetailsClose(true, "TTL-IGW:" + igwCount + "\n");
         // -------------------- End IGW
         // -------------------- Begin VGW
         mSpeaker.printTitle("Virtual Private Gateway:");
@@ -367,7 +367,7 @@ public class Uec2 implements CUtil {
                             + vgw.vpnGatewayId() + ", " + vgw.type() + ", ASN:" + vgw.amazonSideAsn() + ", "
                             + vgw.state());
         }
-        mSpeaker.printResult(true, "TTL-VGW:" + vgwCount + "\n");
+        mSpeaker.printResultParseDetailsClose(true, "TTL-VGW:" + vgwCount + "\n");
         // -------------------- End VGW
         // -------------------- Begin Route Table
         mSpeaker.printTitle("Route Table:");
@@ -419,7 +419,7 @@ public class Uec2 implements CUtil {
                 }
             }
         }
-        mSpeaker.printResult(true, "TTL-Route-Table:" + rtCount + "\n");
+        mSpeaker.printResultParseDetailsClose(true, "TTL-Route-Table:" + rtCount + "\n");
         // -------------------- End Route Table
         // -------------------- Begin NACL
         mSpeaker.printTitle("Network ACL:");
@@ -447,7 +447,7 @@ public class Uec2 implements CUtil {
                 }
             }
         }
-        mSpeaker.printResult(true, "TTL-NACL:" + naclCount + "\n");
+        mSpeaker.printResultParseDetailsClose(true, "TTL-NACL:" + naclCount + "\n");
         // -------------------- End NACL
         // -------------------- Begin SG
         mSpeaker.printTitle("Security Group:");
@@ -486,7 +486,7 @@ public class Uec2 implements CUtil {
                 }
             }
         }
-        mSpeaker.printResult(true, "TTL-SG:" + sgCount + "\n");
+        mSpeaker.printResultParseDetailsClose(true, "TTL-SG:" + sgCount + "\n");
         // -------------------- End SG
         // -------------------- Begin Endpoint
         mSpeaker.printTitle("VPC Endpoint - Gateway & Interface:");
@@ -553,7 +553,7 @@ public class Uec2 implements CUtil {
                 }
             }
         }
-        mSpeaker.printResult(true, "TTL-ENDPOINT:" + vpceCount + "\n");
+        mSpeaker.printResultParseDetailsClose(true, "TTL-ENDPOINT:" + vpceCount + "\n");
         // -------------------- End Endpoint
         // -------------------- Begin Peering
         mSpeaker.printTitle("VPC Peering Connection - Requester & Accepter:");
@@ -589,7 +589,7 @@ public class Uec2 implements CUtil {
                                 + " of " + c.requesterVpcInfo().vpcId() + ", " + c.status().message());
             }
         }
-        mSpeaker.printResult(true, "TTL-PEERING-REQ:" + vpcprCount);
+        mSpeaker.printResultParseDetailsClose(true, "TTL-PEERING-REQ:" + vpcprCount);
         mSpeaker.printResult(true, "TTL-PEERING-ACC:" + vpcpaCount + "\n");
         // -------------------- End Peering
     }
@@ -612,7 +612,7 @@ public class Uec2 implements CUtil {
                             + nat.natGatewayId() + ", " + nat.state() + ", provisioned-bandwidth:"
                             + (nat.provisionedBandwidth() == null ? "n/a" : nat.provisionedBandwidth()));
         }
-        sSpeaker.printResult(true, "TTL-NATGW:" + natCount + "\n");
+        sSpeaker.printResultParseDetailsClose(true, "TTL-NATGW:" + natCount + "\n");
         // EMR
         int emrCount = 0;
         sSpeaker.printTitle("EMR:");
@@ -651,8 +651,9 @@ public class Uec2 implements CUtil {
                 }
             }
         }
-        sSpeaker.printResult(true, "TTL-EMR:" + emrCount + "\n");
+        sSpeaker.printResultParseDetailsClose(true, "TTL-EMR:" + emrCount + "\n");
         // EC2
+        System.out.println("");
         int ec2Count = 0;
         sSpeaker.printTitle("EC2: Auto Scaling = " + Speaker.STAR + " ,    Auto Recovery = " + Speaker.AUTO_RECOVERY_EC2
                 + " ,    NONE-AS-AR = " + Speaker.NONE_ASG_AR_EC2);
@@ -750,7 +751,7 @@ public class Uec2 implements CUtil {
                 }
             } // for EC2
         }
-        sSpeaker.printResult(true, "TTL-SUBNET-EC2:" + subnetEc2Count + "\n");
+        sSpeaker.printResultParseDetailsClose(true, "TTL-SUBNET-EC2:" + subnetEc2Count);
         return ec2Count;
     }
 

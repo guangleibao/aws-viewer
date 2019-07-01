@@ -122,7 +122,7 @@ public class Uelasticloadbalancing implements CUtil {
                 }
             }
         }
-        vSpeaker.printResult(true, "TTL-ELB:" + elbCount + "\n");
+        vSpeaker.printResultParseDetailsClose(true, "TTL-ELB:" + elbCount + "\n");
         // -------------------- End ELB
     }
 

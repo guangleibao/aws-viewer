@@ -92,7 +92,7 @@ public class Uelasticsearch implements CUtil {
                 esSpeaker.printResult(true, uec2.decodeSubnetsById(ec2, esde.vpcOptions().subnetIds()));
             }
         }
-        vSpeaker.printResult(true, "TTL-ES:" + esCount + "\n");
+        vSpeaker.printResultParseDetailsClose(true, "TTL-ES:" + esCount + "\n");
         // -------------------- End ES
     }
 

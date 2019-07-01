@@ -193,7 +193,7 @@ public class Uecs implements CUtil {
                 }
             }
         }
-        mSpeaker.printResult(true, "TTL-ECS:" + ecsCount + "\n");
+        mSpeaker.printResultParseDetailsClose(true, "TTL-ECS:" + ecsCount + "\n");
         // -------------------- End ECS
     }
 

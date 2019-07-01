@@ -137,6 +137,9 @@ public class WaTool {
                 return;
         }
 
+        /**
+         * Main.
+         */
         public static void main(String[] args) throws Exception {
                 Logger.getRootLogger().setLevel(Level.OFF);
                 coreV2(args);
@@ -203,7 +206,7 @@ public class WaTool {
                                         Filter routeTableF = Filter.builder().name("vpc-id").values(vpc.vpcId())
                                                         .build();
                                         String vpcName = uec2.getNameTagValueEc2(vpc.tags());
-                                        vSpeaker.smartPrintTitle("VPC: " + vpcName + "|" + vpc.vpcId() + ", "
+                                        vSpeaker.smartPrintTitleRestrict("VPC: " + vpcName + "|" + vpc.vpcId() + ", "
                                                         + vpc.cidrBlock() + ", tenancy: " + vpc.instanceTenancy());
 
                                         // -------------------- Begin Common
@@ -225,7 +228,7 @@ public class WaTool {
                                         int ttlEc2 = 0;
                                         for (Subnet s : uec2.getSubnetsInVpc()) {
                                                 Speaker sSpeaker = vSpeaker.clone();
-                                                sSpeaker.smartPrintTitle("SUBNET-" + (++sc) + ": "
+                                                sSpeaker.smartPrintTitleRestrict("SUBNET-" + (++sc) + ": "
                                                                 + uec2.decodeSubnetById(ec2, s.subnetId()) + " RT: "
                                                                 + uec2.rtIdToRtTagOrId(ec2, (uec2
                                                                                 .getSubnetToRouteTable()
@@ -241,8 +244,7 @@ public class WaTool {
                                                 ttlEc2 = ttlEc2 + uec2.printSubnetToolkit(ec2, emr, vpc.vpcId(),
                                                                 s.subnetId(), mode, sSpeaker);
                                         }
-                                        vSpeaker.printResult(true, "TTL-VPC-EC2:" + ttlEc2 + "\n");
-                                        vSpeaker.smartPrintTitle("End VPC: " + vpcName);
+                                        vSpeaker.smartPrintTitleRestrict("End VPC: " + vpcName+", TTL EC2: "+ttlEc2);
                                 } // End VPC
                         }
                 }

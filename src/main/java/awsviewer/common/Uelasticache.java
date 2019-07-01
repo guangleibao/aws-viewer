@@ -153,7 +153,7 @@ public class Uelasticache implements CUtil {
                 }
             }
         }
-        vSpeaker.printResult(true, "TTL-MEMCACHE:" + mdCount);
+        vSpeaker.printResultParseDetailsClose(true, "TTL-MEMCACHE:" + mdCount);
         vSpeaker.printResult(true, "TTL-REDIS:" + rdCount + "\n");
         // -------------------- End EalstiCache
     }
