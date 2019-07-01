@@ -2,13 +2,18 @@ package awsviewer.conf;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Hashtable;
+import java.util.Map;
+
+import awsviewer.common.Uec2;
+
 
 @SuppressWarnings("serial")
-public class Speaker implements Serializable {
+public class Speaker implements Serializable{
     public enum RenderType {
-
-        CONSOLE("console"), WEB("web"), MD("md");
+    	
+        CONSOLE("console"),
+        WEB("web"),
+        MD("md");
 
         private String name;
 
@@ -63,21 +68,31 @@ public class Speaker implements Serializable {
 
     private RenderType renderType;
     private String renderTypeName;
-
+    
     private String profile;
 
+    private Uec2 uec2;
+    
     private int titleLevel = 0;
     private int resultLevel = 0;
-
+    
     public String getProfile() {
-        return profile;
+		return this.profile;
+	}
+
+	public void setProfile(String profile) {
+		this.profile = profile;
+    }
+    
+    public Uec2 getUec2(){
+        return this.uec2;
     }
 
-    public void setProfile(String profile) {
-        this.profile = profile;
+    public void setUec2(Uec2 uec2){
+        this.uec2 = uec2;
     }
 
-    private static final String NEWLINE_WEB = "<br>";
+	private static final String NEWLINE_WEB = "<br>";
     private static final String NEWLINE_CONSOLE = "\n";
     private static final String INDENT_WEB = "&nbsp;&nbsp;&nbsp;&nbsp;";
     private static final String INDENT_CONSOLE = "\t";
@@ -92,10 +107,10 @@ public class Speaker implements Serializable {
     private String indent;
     private String symbol;
     private String childChar;
-
+    
     public static Speaker getConsoleInstance() {
-        Speaker sk = new Speaker(Speaker.RenderType.CONSOLE, "#", ">>");
-        return sk;
+    	Speaker sk =  new Speaker(Speaker.RenderType.CONSOLE,"#",">>");
+    	return sk;
     }
 
     public static Speaker getMdInstance() {
@@ -108,97 +123,100 @@ public class Speaker implements Serializable {
         sk.setProfile(profile);
         return sk;
     }
-
+    
     /**
      * Preferred method to initialize a console speaker.
-     * 
      * @param profile
      * @return
      */
     public static Speaker getConsoleInstance(String profile) {
-        Speaker sk = new Speaker(Speaker.RenderType.CONSOLE, "#", ">>");
+    	Speaker sk =  new Speaker(Speaker.RenderType.CONSOLE,"#",">>");
         sk.setProfile(profile);
-        return sk;
+    	return sk;
     }
-
+    
     /**
      * Return a group of console speakers.
-     * 
      * @param count
      * @param profile
      * @return
      */
     public static Speaker[] getConsoleInstances(int count, String profile) {
-        Speaker[] speakers = new Speaker[count];
-        for (int i = 0; i < speakers.length; i++) {
-            speakers[i] = new Speaker(Speaker.RenderType.CONSOLE, "#", "]>>");
-        }
-        return speakers;
+    	Speaker[] speakers = new Speaker[count];
+    	for(int i=0;i<speakers.length;i++) {
+    		speakers[i] = new Speaker(Speaker.RenderType.CONSOLE,"#","]>>");
+    	}
+    	return speakers;
     }
-
+    
     /**
      * Give me the name of renderer type: WEB, CONSOLE,...
-     * 
      * @param typeName
      * @return
      */
-    public static Speaker.RenderType makeRenderer(String typeName) {
+    public static Speaker.RenderType makeRenderer(String typeName){
         Speaker.RenderType rt = null;
-        if (typeName.equalsIgnoreCase("CONSOLE")) {
+        if(typeName.equalsIgnoreCase("CONSOLE")){
             rt = Speaker.RenderType.CONSOLE;
-        } else if (typeName.equalsIgnoreCase("WEB")) {
+        }
+        else if(typeName.equalsIgnoreCase("WEB")){
             rt = Speaker.RenderType.WEB;
-        } else {
+        }
+        else{
             rt = Speaker.RenderType.CONSOLE;
         }
         return rt;
     }
 
-    public String getChild(int level) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < level; i++) {
-            sb.append("  ");
-        }
-        return new String(sb) + this.childChar + " ";
+    public String getChild(int level){
+    	StringBuffer sb = new StringBuffer();
+    	for(int i=0;i<level;i++){
+    		sb.append("  ");
+    	}
+    	return new String(sb)+this.childChar+" ";
     }
+
 
     private String makeTitlePrefix(String symbol, int symbolCount, int indent) {
         StringBuffer line = new StringBuffer();
         String prefix = null;
-        if (this.renderType == RenderType.CONSOLE) {
+        if (this.renderType == RenderType.CONSOLE){
             prefix = INDENT_CONSOLE_TITLE;
-        } else {
+        }
+        else {
             prefix = this.indent;
         }
         for (int i = 0; i < indent; i++) {
             line.append(prefix);
-        } // end for
+        } //end for
         for (int i = 0; i < symbolCount; i++) {
             line.append(symbol);
-        } // end for
+        } //end for
         return line.toString();
     }
-
+    
     public void setLevel(int titleLevel, int resultLevel) {
-        this.titleLevel = titleLevel;
-        this.resultLevel = resultLevel;
+    	this.titleLevel = titleLevel;
+    	this.resultLevel = resultLevel;
     }
-
-    public Speaker(RenderType renderType, String symbol, String childchar) {
-        this.setRenderType(renderType);
-        this.symbol = symbol;
+    
+    
+    public Speaker(RenderType renderType, String symbol, String childchar){
+    	this.setRenderType(renderType);
+    	this.symbol = symbol;
         this.childChar = childchar;
     }
-
+    
     @Deprecated
     public Speaker(RenderType renderType) {
-        this(renderType, "#", ">");
+        this(renderType,"#",">");
     }
-
+    
     @Deprecated
     public Speaker() {
         this(RenderType.CONSOLE);
     }
+
 
     public void setRenderType(RenderType renderType) {
         this.renderType = renderType;
@@ -218,13 +236,13 @@ public class Speaker implements Serializable {
         }
     }
 
+    
+    
     /**
-     * Return the formtted title, and set the chrome symbol, and set the indent
-     * content.
-     * 
-     * @param content     The title content.
-     * @param symbol      The title delimiter symbol.
-     * @param indentCount The indent count.
+     * Return the formtted title, and set the chrome symbol, and set the indent content.
+     * @param content       The title content.
+     * @param symbol        The title delimiter symbol.
+     * @param indentCount   The indent count.
      * @return
      */
     public String makeTitle(int indentCount, String symbol, String content) {
@@ -254,39 +272,36 @@ public class Speaker implements Serializable {
         }
         return this.newLine + ret;
     }
-
-    public void printLine() {
+    
+    public void printLine(){
         System.out.println(this.getNewLine());
     }
 
-    public void printTitle(int indentCount, String symbol, String content) {
-        System.out.println(this.makeTitle(indentCount, symbol, content));
+    public void printTitle(int indentCount, String symbol, String content){
+    	System.out.println(this.makeTitle(indentCount, symbol, content));
     }
-
+    
     /**
      * Return the formatted title, and set the indent count.
-     * 
-     * @param content     The title content.
-     * @param indentCount The indent count.
+     * @param content       The title content.
+     * @param indentCount   The indent count.
      * @return
      */
     public String makeTitle(int indentCount, String content) {
         return makeTitle(indentCount, this.symbol, content);
     }
-
+    
     /**
      * Print the title on screen, manually specify the indent count.
-     * 
      * @param indentCount
      * @param content
      */
-    public void printTitle(int indentCount, String content) {
-        System.out.println(this.makeTitle(indentCount, content));
+    public void printTitle(int indentCount, String content){
+    	System.out.println(this.makeTitle(indentCount, content));
     }
-
+    
     /**
      * Print title and incr the title level.
-     * 
      * @param content
      */
     public void smartPrintTitle(String content) {
@@ -298,54 +313,51 @@ public class Speaker implements Serializable {
      * Print title in the current level.
      */
     public void printTitle(String content) {
-        this.printTitle(this.titleLevel, content);
+    	this.printTitle(this.titleLevel, content);
     }
-
+    
     /**
-     * Clone a new console Speaker with the same title and result levels.
-     * 
+     * Clone a new console Speaker with the same title and result levels. 
      * @return
      */
     @Override
     public Speaker clone() {
-        Speaker s = Speaker.getConsoleInstance(this.profile);
-        s.setLevel(this.titleLevel, this.resultLevel);
-        s.setIndent(this.getIndent());
-        s.setNewLine(this.getNewLine());
+    	Speaker s = Speaker.getConsoleInstance(this.profile);
+    	s.setLevel(this.titleLevel, this.resultLevel);
+    	s.setIndent(this.getIndent());
+    	s.setNewLine(this.getNewLine());
         s.setRenderType(this.getRenderType());
-        return s;
+        s.setUec2(this.getUec2());
+    	return s;
     }
-
+    
     /**
      * Return an array of the cloned Speaker.
-     * 
      * @param l
      * @return
      */
     public Speaker[] cloneCoverList(Collection<?> l) {
-        Speaker[] ss = new Speaker[l.size()];
-        for (int i = 0; i < ss.length; i++) {
-            ss[i] = this.clone();
-        }
-        return ss;
+    	Speaker[] ss = new Speaker[l.size()];
+    	for(int i=0;i<ss.length;i++) {
+    		ss[i] = this.clone();
+    	}
+    	return ss;
     }
-
+    
     public Speaker[] cloneMultiple(int cnt) {
-        Speaker[] ss = new Speaker[cnt];
-        for (int i = 0; i < ss.length; i++) {
-            ss[i] = this.clone();
-        }
-        return ss;
+    	Speaker[] ss = new Speaker[cnt];
+    	for(int i=0;i<ss.length;i++) {
+    		ss[i] = this.clone();
+    	}
+    	return ss;
     }
-
+    
     /**
-     * Return a formatted result, set the indent count, and specify whether newline
-     * is appended.
-     * 
+     * Return a formatted result, set the indent count, and specify whether newline is appended.
      * @param <E>
-     * @param e           The result content.
-     * @param indentCount The indent count.
-     * @param withNewLine With or without NewLine.
+     * @param e             The result content.
+     * @param indentCount   The indent count.
+     * @param withNewLine   With or without NewLine.
      * @return
      */
     public <E> String makeResult(int indentCount, boolean withNewLine, E e) {
@@ -387,44 +399,42 @@ public class Speaker implements Serializable {
         return ret;
     }
 
+    
     /**
      * Print result to screen, manually specify the indent level.
-     * 
      * @param indentCount
      * @param withNewLine
      * @param e
      */
-    public <E> void printResult(int indentCount, boolean withNewLine, E e) {
-        System.out.print(this.makeResult(indentCount, withNewLine, e));
+    public <E> void printResult(int indentCount, boolean withNewLine, E e){
+    	System.out.print(this.makeResult(indentCount, withNewLine, e));
     }
-
+    
     /**
      * Print raw string out.
-     * 
      * @param withNewLine
      * @param e
      */
     public <E> void printRaw(boolean withNewLine, E e) {
-        if (withNewLine) {
-            System.out.print(e + this.newLine);
-        } else {
-            System.out.print(e);
-        }
+    	if(withNewLine) {
+    		System.out.print(e+this.newLine);
+    	}
+    	else {
+    		System.out.print(e);
+    	}
     }
-
+    
     /**
      * Print result to screen and leave result level untouched.
-     * 
      * @param withNewLine
      * @param e
      */
     public <E> void printResult(boolean withNewLine, E e) {
-        this.printResult(this.resultLevel, withNewLine, e);
+    	this.printResult(this.resultLevel, withNewLine, e);
     }
-
+    
     /**
      * Print result to screen and incr the result level.
-     * 
      * @param withNewLine
      * @param e
      */
@@ -458,30 +468,45 @@ public class Speaker implements Serializable {
     }
 
     /**
-     * Place holder for icon of WA instance types.
+     * Place holder for icon of instance types.
      */
-    public char getIconForEC2InstanceType(String instanceId, Hashtable<String, String> instanceId2Ec2Type) {
+    public char getIconForEC2InstanceType(String instanceId, Map<String,String> instanceId2Ec2Type){
         String ec2Type = instanceId2Ec2Type.get(instanceId);
         char ret = Speaker.NONE_ASG_AR_EC2;
-        if (ec2Type != null && ec2Type.equals("ASG")) {
+        if(ec2Type!=null && ec2Type.equals("ASG")){
             ret = Speaker.STAR;
-        } else if (ec2Type != null && ec2Type.equals("AR")) {
+        }
+        else if(ec2Type!=null && ec2Type.equals("AR")){
             ret = Speaker.AUTO_RECOVERY_EC2;
         }
         return ret;
     }
 
     /**
-     * Should be used in CUtil class's printAllResource() method, more specifically
-     * - the mSpeaker which clones skBranch.
+     * Should be used in CUtil class's printAllResource() method, more specifically - the mSpeaker which clones skBranch.
      */
-    public void printResourceSubTitle(String overrideResourceName) {
+    public void printResourceSubTitle(String overrideResourceName){
         String cUtilName = null;
-        if (overrideResourceName != null) {
+        if(overrideResourceName!=null){
             cUtilName = overrideResourceName;
-        } else {
-            cUtilName = Thread.currentThread().getStackTrace()[2].getClassName().replaceAll("bglutil.common.U", "");
         }
-        this.smartPrintResult(true, Speaker.BLOCK + " Checking ||| " + cUtilName + " |||");
+        else{
+            cUtilName =Thread.currentThread().getStackTrace()[2].getClassName().replaceAll("bglutil.common.U","");
+        }
+        this.smartPrintResult(true, Speaker.BLOCK+" Checking ||| "+cUtilName+" |||");
+    }
+
+    /**
+     * Should be used in CUtil class's destroyResourceByNamePrefix() method, more specifically - the mSpeaker which clones skBranch.
+     */
+    public void printDestroyResourceByNamePrefix(String overrideResourceName, String prefix){
+        String cUtilName = null;
+        if(overrideResourceName!=null){
+            cUtilName = overrideResourceName;
+        }
+        else{
+            cUtilName =Thread.currentThread().getStackTrace()[2].getClassName().replaceAll("bglutil.common.U","");
+        }
+        this.smartPrintResult(true, Speaker.REMOVING+" Deleting "+cUtilName+" with name prefix "+prefix); 
     }
 }

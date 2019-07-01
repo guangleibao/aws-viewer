@@ -7,7 +7,6 @@ import awsviewer.conf.Clients;
 import awsviewer.conf.Helper;
 import awsviewer.conf.Speaker;
 import awsviewer.inf.CUtil;
-import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
@@ -31,30 +30,34 @@ public class Uelasticloadbalancingv2 implements CUtil {
 
     /**
      * Print show version 2 ELB.
+     * 
+     * @throws Exception
      */
     @Override
-    public void printAllResource(SdkClient c, Speaker skBranch) {
-        ElasticLoadBalancingV2Client elb = (ElasticLoadBalancingV2Client) c;
+    public void printAllResource(Speaker skBranch) throws Exception {
+        ElasticLoadBalancingV2Client elb = (ElasticLoadBalancingV2Client) Clients.getClientByServiceClass(Clients.ELASTICLOADBALANCINGV2, skBranch.getProfile());
         Speaker mSpeaker = skBranch.clone();
         mSpeaker.printResourceSubTitle(null);
         List<LoadBalancer> lbs = elb.describeLoadBalancers().loadBalancers();
         int elbv2Count = 0;
         for (LoadBalancer l2 : lbs) {
             Speaker lbv2Speaker = mSpeaker.clone();
-            lbv2Speaker.smartPrintResult(true, Speaker.ELB+" ELB-" + (++elbv2Count) + "-" + l2.type() + ": "
-							+ l2.loadBalancerName() + ", " + l2.scheme() + ", "+l2.ipAddressTypeAsString()+", "+l2.state().codeAsString()+", "+ l2.dnsName());
-            lbv2Speaker.smartPrintResult(true, this.getAttributes(elb, l2.loadBalancerArn(),0,3));    
-            lbv2Speaker.printResult(true, this.getAttributes(elb, l2.loadBalancerArn(),3,100));
+            lbv2Speaker.smartPrintResult(true,
+                    Speaker.ELB + " ELB-" + (++elbv2Count) + "-" + l2.type() + ": " + l2.loadBalancerName() + ", "
+                            + l2.scheme() + ", " + l2.ipAddressTypeAsString() + ", " + l2.state().codeAsString() + ", "
+                            + l2.dnsName());
+            lbv2Speaker.smartPrintResult(true, this.getAttributes(elb, l2.loadBalancerArn(), 0, 3));
+            lbv2Speaker.printResult(true, this.getAttributes(elb, l2.loadBalancerArn(), 3, 100));
         }
     }
 
-    public void printVpcResource(SdkClient c, Filter[] filters, String andOrOr, String mode, Speaker skBranch)
+    @Override
+    public void printVpcResource(String andOrOr, String mode, Speaker skBranch, Filter... filters)
             throws Exception {
         Speaker mSpeaker = skBranch.clone();
-        ElasticLoadBalancingV2Client elbv2 = (ElasticLoadBalancingV2Client) c;
+        ElasticLoadBalancingV2Client elbv2 = (ElasticLoadBalancingV2Client) Clients.getClientByServiceClass(Clients.ELASTICLOADBALANCINGV2, skBranch.getProfile());
         Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, mSpeaker.getProfile());
-        Uelasticloadbalancingv2 uelbv2 = Uelasticloadbalancingv2.build();
-        Uec2 uec2 = Uec2.build();
+        Uec2 uec2 = skBranch.getUec2();
         Iterator<DescribeVpcsResponse> iterVpcs = null;
         if (andOrOr.equals("OR")) {
             for (Filter f : filters) {
@@ -62,7 +65,7 @@ public class Uelasticloadbalancingv2 implements CUtil {
                 while (iterVpcs.hasNext()) {
                     List<Vpc> vpcs = iterVpcs.next().vpcs();
                     for (Vpc vpc : vpcs) {
-                        this.printVpcElbv2(elbv2, ec2, uelbv2, uec2, vpc.vpcId(), mode, mSpeaker);
+                        this.printVpcElbv2(elbv2, ec2, uec2, vpc.vpcId(), mode, mSpeaker);
                     }
                 }
             }
@@ -71,14 +74,14 @@ public class Uelasticloadbalancingv2 implements CUtil {
             while (iterVpcs.hasNext()) {
                 List<Vpc> vpcs = iterVpcs.next().vpcs();
                 for (Vpc vpc : vpcs) {
-                    this.printVpcElbv2(elbv2, ec2, uelbv2, uec2, vpc.vpcId(), mode, mSpeaker);
+                    this.printVpcElbv2(elbv2, ec2, uec2, vpc.vpcId(), mode, mSpeaker);
                 }
             }
         }
     }
 
-    public void printVpcElbv2(ElasticLoadBalancingV2Client elbv2, Ec2Client ec2, Uelasticloadbalancingv2 uelbv2,
-        Uec2 uec2, String vpcId, String mode, Speaker skBranch) {
+    public void printVpcElbv2(ElasticLoadBalancingV2Client elbv2, Ec2Client ec2,
+            Uec2 uec2, String vpcId, String mode, Speaker skBranch) {
         Speaker mSpeaker = skBranch.clone();
         Helper hp = new Helper();
         // -------------------- Begin ELB v2
@@ -113,8 +116,8 @@ public class Uelasticloadbalancingv2 implements CUtil {
                         lbv2Speaker.printResult(true,
                                 "listener: " + l.protocolAsString() + ", " + l.port() + ", ssl:" + l.sslPolicy());
                     }
-                    lbv2Speaker.printResult(true, uelbv2.getAttributes(elbv2, l2.loadBalancerArn(), 0, 3));
-                    lbv2Speaker.printResult(true, uelbv2.getAttributes(elbv2, l2.loadBalancerArn(), 3, 100));
+                    lbv2Speaker.printResult(true, this.getAttributes(elbv2, l2.loadBalancerArn(), 0, 3));
+                    lbv2Speaker.printResult(true, this.getAttributes(elbv2, l2.loadBalancerArn(), 3, 100));
                 }
             }
         }
@@ -125,18 +128,19 @@ public class Uelasticloadbalancingv2 implements CUtil {
     /**
      * Get ELBv2 attributes.
      */
-    public String getAttributes(ElasticLoadBalancingV2Client elbv2, String elbv2Arn, int startIdx, int count){
-        List<LoadBalancerAttribute> attrs = elbv2.describeLoadBalancerAttributes(DescribeLoadBalancerAttributesRequest.builder().loadBalancerArn(elbv2Arn).build()).attributes();
+    public String getAttributes(ElasticLoadBalancingV2Client elbv2, String elbv2Arn, int startIdx, int count) {
+        List<LoadBalancerAttribute> attrs = elbv2.describeLoadBalancerAttributes(
+                DescribeLoadBalancerAttributesRequest.builder().loadBalancerArn(elbv2Arn).build()).attributes();
         StringBuffer sb = new StringBuffer();
-        int i=0;
-        int c=0;
-        for(LoadBalancerAttribute attr:attrs){
-            if(i>=startIdx && c<count){
-                sb.append(attr.key()+":"+attr.value()+", ");
+        int i = 0;
+        int c = 0;
+        for (LoadBalancerAttribute attr : attrs) {
+            if (i >= startIdx && c < count) {
+                sb.append(attr.key() + ":" + attr.value() + ", ");
                 c++;
             }
             i++;
-            if(c==count){
+            if (c == count) {
                 break;
             }
         }

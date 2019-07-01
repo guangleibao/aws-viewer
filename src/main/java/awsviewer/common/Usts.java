@@ -1,13 +1,30 @@
 package awsviewer.common;
 
+import java.util.List;
+
+import awsviewer.conf.AccessKeys;
 import awsviewer.conf.Clients;
+import awsviewer.conf.Config;
 import awsviewer.conf.Speaker;
 import awsviewer.inf.CUtil;
-import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProviderChain;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.model.VirtualMFADevice;
 import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
+import software.amazon.awssdk.services.sts.model.Credentials;
 import software.amazon.awssdk.services.sts.model.DecodeAuthorizationMessageRequest;
 import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest;
 import software.amazon.awssdk.services.sts.model.GetCallerIdentityResponse;
+import software.amazon.awssdk.services.sts.model.GetFederationTokenRequest;
+import software.amazon.awssdk.services.sts.model.GetFederationTokenResponse;
+import software.amazon.awssdk.services.sts.model.GetSessionTokenRequest;
+import software.amazon.awssdk.services.sts.model.GetSessionTokenResponse;
+import software.amazon.awssdk.services.sts.model.StsException;
 
 public class Usts implements CUtil {
 
@@ -16,7 +33,13 @@ public class Usts implements CUtil {
     }
 
     @Override
-    public void printAllResource(SdkClient c, Speaker skBranch) {
+    public void printAllResource(Speaker skBranch) {
+
+    }
+
+    @Override
+    public void printVpcResource(String andOrOr, String mode, Speaker skBranch, Filter... filters) {
+
     }
 
     /**

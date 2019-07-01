@@ -1,10 +1,11 @@
 package awsviewer.common;
 
+import java.util.Iterator;
 import java.util.List;
 
+import awsviewer.conf.Clients;
 import awsviewer.conf.Speaker;
 import awsviewer.inf.CUtil;
-import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
@@ -12,6 +13,8 @@ import software.amazon.awssdk.services.autoscaling.model.DescribeLaunchConfigura
 import software.amazon.awssdk.services.autoscaling.model.Filter;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.Tag;
+import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
 
 public class Uautoscaling implements CUtil {
 
@@ -20,8 +23,9 @@ public class Uautoscaling implements CUtil {
     }
 
     @Override
-    public void printAllResource(SdkClient c, Speaker skBranch) {
-        AutoScalingClient asg = (AutoScalingClient) c;
+    public void printAllResource(Speaker skBranch) throws Exception {
+        AutoScalingClient asg = (AutoScalingClient) Clients.getClientByServiceClass(Clients.AUTOSCALING,
+                skBranch.getProfile());
         Speaker mSpeaker = skBranch.clone();
         mSpeaker.printResourceSubTitle(null);
         Speaker lcSpeaker = mSpeaker.clone();
@@ -41,6 +45,47 @@ public class Uautoscaling implements CUtil {
         for (LaunchConfiguration lc : lcs) {
             lcSpeaker.printResult(true, Speaker.LC + " LC-" + (++lcCount) + ": " + lc.launchConfigurationName());
         }
+    }
+
+    @Override
+    public void printVpcResource(String andOrOr, String mode, Speaker skBranch,
+            software.amazon.awssdk.services.ec2.model.Filter... filters) {
+        
+    }
+
+    public void printVpcAsg(AutoScalingClient asg, Ec2Client ec2, Uec2 uec2, String vpcId, Speaker skBranch){
+        Speaker vSpeaker = skBranch.clone();
+        // -------------------- Begin Auto Scaling Group
+        vSpeaker.printTitle("Auto Scaling Group:");
+        int asgCount = 0;
+        Iterator<AutoScalingGroup> iterAsg = asg.describeAutoScalingGroupsPaginator().autoScalingGroups()
+                .iterator();
+        AutoScalingGroup as = null;
+        Speaker asSpeaker = null;
+        while (iterAsg.hasNext()) {
+            as = iterAsg.next();
+            asSpeaker = vSpeaker.clone();
+            String subnetString = as.vpcZoneIdentifier();
+            String[] subnets = subnetString.split(",");
+            if (vpcId
+                    .equals(ec2
+                            .describeSubnets(DescribeSubnetsRequest.builder().subnetIds(subnets[0]).build())
+                            .subnets().get(0).vpcId())) {
+                asSpeaker.smartPrintResult(true,
+                        Speaker.ASG + " ASG-" + (++asgCount) + ": " + as.autoScalingGroupName() + ", lc:"
+                                + as.launchConfigurationName() + ", status:" + as.status() + ", hc-type:"
+                                + as.healthCheckType());
+                asSpeaker.printResult(true, "az:" + as.availabilityZones());
+                List<software.amazon.awssdk.services.autoscaling.model.Instance> instances = as.instances();
+                asSpeaker.printResult(true, "desired:" + as.desiredCapacity() + ", max:" + as.maxSize()
+                        + ", min:" + as.minSize() + ", registered:" + instances.size());
+                for (software.amazon.awssdk.services.autoscaling.model.Instance instance : instances) {
+                    uec2.getInstanceId2Ec2Type().put(instance.instanceId(), "ASG");
+                }
+            }
+        }
+        vSpeaker.printResult(true, "TTL-ASG:" + asgCount + "\n");
+        // -------------------- End Auto Scaling Group
     }
 
     /**
