@@ -32,4 +32,4 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 	- Run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showInstanceType 1 demo-profile`**
 
 ## More Information about the Usage
-+ **`showVpc`** can help checking the reliability pillar of [Well-Architected practices](https://aws.amazon.com/architecture/well-architected/).
++ **`showVpc`** can help checking the reliability pillar of [Well-Architected practices](https://aws.amazon.com/architecture/well-architected/), or use it as a simple troubleshooting tool for VPC resources.
