@@ -22,7 +22,7 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 + Get general help:
 	- Run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar`**
 + Get tool help:
-	- For example, run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc -h`**
+	- Use `-h`, For example, run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc -h`**
 
 ## Run
 + For example, if the VPC name is **`demo-vpc`** and the named profile is **`demo-profile`**:
