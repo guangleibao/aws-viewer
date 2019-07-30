@@ -10,6 +10,14 @@ public class Helper {
 
 	public static final Speaker SK = Speaker.getConsoleInstance();
 
+	public void waitFor(int msec){
+		try {
+			Thread.sleep(msec);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * Redact input string.
 	 */

@@ -185,6 +185,20 @@ public class Uec2 implements CUtil {
         return new Uec2();
     }
 
+    /**
+     * Get one of AMZ Linux AMI
+     */
+    public Image getOneOfAmazonLinuxAmi(Ec2Client ec2) {
+        Filter f1 = this.createFilterEc2("name", "*amzn-ami-hvm*gp2");
+		Filter f2 = this.createFilterEc2("architecture","*x86_64");
+		Filter f3 = this.createFilterEc2("hypervisor","xen");
+		Filter f4 = this.createFilterEc2("owner-alias","amazon");
+		Filter f5 = this.createFilterEc2("state","available");
+		Filter f6 = this.createFilterEc2("virtualization-type","hvm");
+		Image ami = ec2.describeImages(DescribeImagesRequest.builder().filters(f1, f2, f3, f4, f5, f6).build()).images().get(0);
+		return ami;
+	}
+
     @Override
     public void printAllResource(Speaker skBranch) throws Exception {
         Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, skBranch.getProfile());

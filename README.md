@@ -4,6 +4,9 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 ## Tools
 1. Show resources within VPC in HTML format: **`showVpc`**
 	- Supported services: *EC2, ASG, EMR, ES, ECS, VPC Endpoint, Redshift, RDS, ElastiCache, Lambda, ELB, ELBv2, SG, NACL, Route Table*.
+	- For example: `showVpc demo-vpc redact demo-profile > demo.html`
+2. Show all instance types and are there sufficient capacities for instance types: **`showInstanceType`**
+	- For example: `showInstanceType 1 demo-profile`
 
 ## Configure
 1. Create an IAM user and generate access key and secret.

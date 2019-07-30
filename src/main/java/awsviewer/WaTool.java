@@ -8,6 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -31,6 +38,8 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.Image;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.emr.EmrClient;
@@ -39,6 +48,7 @@ public class WaTool {
 
         private static final Helper HELPER = new Helper();
         private static final Speaker SK = Speaker.getConsoleInstance(null);
+        private final Helper helper = new Helper();
 
         public static final ArrayList<String> SKIPPED_METHODS = new ArrayList<String>();
 
@@ -259,6 +269,67 @@ public class WaTool {
                                                         + uec2.getInstanceId2Ec2Type().get("AR") + ", NONE-ASG-AR:"
                                                         + uec2.getInstanceId2Ec2Type().get("NONE-ASG-AR"));
                                 } // End VPC
+                        }
+                }
+        }
+
+        /**
+         * Show instance type by profile
+         */
+        public void showInstanceType(String count, String profile) throws Exception {
+                HELPER.help(count, "<instance-count> <profile>");
+                General.init(profile);
+                int i = 1;
+                Speaker mSpeaker = Speaker.getConsoleInstance(profile);
+                Speaker allTypeSpeaker = mSpeaker.clone();
+                allTypeSpeaker.smartPrintTitle("All Instance Type");
+                List<String> its = new ArrayList<String>();
+                for (InstanceType type : InstanceType.values()) {
+                        if (type.toString() != null && !type.toString().equals("null")) {
+                                mSpeaker.printResult(1, true, i++ + ") " + type.toString());
+                                its.add(type.toString());
+                        }
+                }
+                Speaker validTypeSpeaker = mSpeaker.clone();
+                validTypeSpeaker.smartPrintTitle("Valid Instance Type for " + General.PROFILE_REGION.get(profile).id());
+                Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, profile);
+                Uec2 uec2 = Uec2.build();
+                Image ami = uec2.getOneOfAmazonLinuxAmi(ec2);
+                AWSCredentialsProviderChain ec2Profile = new AWSCredentialsProviderChain(
+                                new ProfileCredentialsProvider(profile));
+                AmazonEC2 ec2o = AmazonEC2ClientBuilder.standard().withCredentials(ec2Profile)
+                                .withRegion(General.PROFILE_REGION.get(profile).id()).build();
+                for (String it : its) {
+                        helper.waitFor(300);
+                        RunInstancesRequest realreq = new RunInstancesRequest().withImageId(ami.imageId())
+                                        .withInstanceType(it).withMinCount(Integer.parseInt(count)).withMaxCount(Integer.parseInt(count));
+                        validTypeSpeaker.printResult(false, it);
+                        try {
+                                ec2o.dryRun(realreq).getDryRunResponse();
+                                validTypeSpeaker.printRaw(true, " => Supported - HVM");
+                        } catch (AmazonClientException ex) {
+                                if (ex.getMessage().contains("Unrecognized service response for the dry-run request")) {
+                                        if (ex.getCause().getMessage().matches(
+                                                        "^Your requested instance type .* is not supported in this region.*")) {
+                                                System.out.println(" => Not Supported (Instance-type)");
+                                        } else if (ex.getCause().getMessage().contains(
+                                                        "The requested configuration is currently not supported. Please check the documentation")) {
+                                                System.out.println(" => Not Supported (Config)");
+                                        } else if (ex.getCause().getMessage().contains(
+                                                        "Non-Windows instances with a virtualization type of 'hvm' are currently not supported for this instance type")) {
+                                                System.out.println(" => Supported - PV");
+                                        } else if (ex.getCause().getMessage()
+                                                        .contains("than your current instance limit")) {
+                                                System.out.println(" => Supported - HVM - check soft limit");
+                                        } else if (ex.getCause().getMessage().contains(
+                                                        "Enhanced networking with the Elastic Network Adapter (ENA) is required")) {
+                                                System.out.println(" => Supported - HVM - ENA required");
+                                        } else {
+                                                System.out.println(" => " + ex.getCause().getMessage());
+                                        }
+                                } else {
+                                        System.out.println(" => " + ex.getMessage());
+                                }
                         }
                 }
         }
