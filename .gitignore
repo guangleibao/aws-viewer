@@ -33,4 +33,5 @@ target/
 countLine.sh
 test.sh
 test.md
+test.html
 pom.xml.backup

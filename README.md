@@ -2,7 +2,7 @@
 Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 
 ## Tools
-1. Show resources within VPC in markdown format: **`showVpc`**
+1. Show resources within VPC in HTML format: **`showVpc`**
 	- Supported services: *EC2, ASG, EMR, ES, ECS, VPC Endpoint, Redshift, RDS, ElastiCache, Lambda, ELB, ELBv2, SG, NACL, Route Table*.
 
 ## Configure
@@ -22,8 +22,8 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 
 ## Run
 + For example, if the VPC name is **`demo-vpc`** and the named profile is **`demo-profile`**:
-	- Run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc redact demo-profile`** in redact mode (recommanded).
- 	- Or, run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc plain demo-profile`** in plain mode.
+	- Run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc redact demo-profile > demo.html`** in redact mode (recommanded).
+ 	- Or, run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc plain demo-profile > demo.html`** in plain mode.
 
 ## More Information about the Usage
 + **`showVpc`** can help checking the reliability pillar of [Well-Architected practices](https://aws.amazon.com/architecture/well-architected/).

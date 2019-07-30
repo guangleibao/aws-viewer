@@ -659,7 +659,7 @@ public class Uec2 implements CUtil {
         System.out.println("");
         int ec2Count = 0;
         sSpeaker.printTitle("EC2: Auto Scaling = " + Speaker.STAR + " ,    Auto Recovery = " + Speaker.AUTO_RECOVERY_EC2
-                + " ,    NONE-AS-AR = " + Speaker.NONE_ASG_AR_EC2);
+                + " ,    NONE-ASG-AR = " + Speaker.NONE_ASG_AR_EC2);
         int subnetEc2Count = 0;
         Filter vpcInstanceFilter = Filter.builder().name("vpc-id").values(vpcId).build();
         Iterator<DescribeInstancesResponse> iterReservations = ec2

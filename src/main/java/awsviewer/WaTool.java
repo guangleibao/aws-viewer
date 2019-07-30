@@ -150,10 +150,11 @@ public class WaTool {
          */
         public void showVpc(String prefix, String mode, String profile) throws Exception {
                 // ------------- INIT
-                HELPER.help(prefix, "<vpc-name-prefix|vpc-id> <mode: redact|plain> <profile>");
+                HELPER.help(prefix, "<vpc-name-prefix|vpc-id|?> <mode: redact|plain> <profile>");
 
                 // Define the method Speaker
-                Speaker mSpeaker = Speaker.getMdInstance(profile);
+                Speaker mSpeaker = Speaker.getWebInstance(profile);
+                System.out.println("<body style = 'font-family:monospace;' >");
 
                 // Ready the SDK environment
                 General.init(profile);
@@ -182,9 +183,15 @@ public class WaTool {
                 vpcUtil.add(uasg);
 
                 // Define VPCs
-                Filter vpcF = uec2.createFilterEc2("tag:Name", prefix + "*");
-                Filter vpcF2 = uec2.createFilterEc2("vpc-id", prefix);
-                Filter[] tries = new Filter[] { vpcF, vpcF2 };
+                Filter[] tries = null;
+                if (prefix.equals("?")) {
+                        Filter vpcF = uec2.createFilterEc2("tag:Name", "*");
+                        tries = new Filter[] { vpcF };
+                } else {
+                        Filter vpcF = uec2.createFilterEc2("tag:Name", prefix + "*");
+                        Filter vpcF2 = uec2.createFilterEc2("vpc-id", prefix);
+                        tries = new Filter[] { vpcF, vpcF2 };
+                }
 
                 // EC2 Core
                 Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, profile);
@@ -218,8 +225,10 @@ public class WaTool {
                                         // -------------------- End Common
 
                                         // Begin Print VPC Resources
+                                        Speaker vpcResourceSpeaker = vSpeaker.clone();
+                                        vpcResourceSpeaker.smartPrintTitle("VPC Common");
                                         for (CUtil c : vpcUtil) {
-                                                c.printVpcResource("AND", mode, vSpeaker, f);
+                                                c.printVpcResource("AND", mode, vpcResourceSpeaker, f);
                                         }
                                         // End Print VPC Resources
 
@@ -244,10 +253,11 @@ public class WaTool {
                                                 ttlEc2 = ttlEc2 + uec2.printSubnetToolkit(ec2, emr, vpc.vpcId(),
                                                                 s.subnetId(), mode, sSpeaker);
                                         }
-                                        vSpeaker.smartPrintTitleRestrict("End VPC: " + vpcName+", TTL EC2: "+ttlEc2+", In ASG:"+
-                    uec2.getInstanceId2Ec2Type().get("ASG")+", Protected by Auto Recovery:"+
-                    uec2.getInstanceId2Ec2Type().get("AR")+", NONE-ASG-AR:"+
-                    uec2.getInstanceId2Ec2Type().get("NONE-ASG-AR"));
+                                        vSpeaker.smartPrintTitleRestrict("End VPC: " + vpcName + ", TTL EC2: " + ttlEc2
+                                                        + ", In ASG:" + uec2.getInstanceId2Ec2Type().get("ASG")
+                                                        + ", Protected by Auto Recovery:"
+                                                        + uec2.getInstanceId2Ec2Type().get("AR") + ", NONE-ASG-AR:"
+                                                        + uec2.getInstanceId2Ec2Type().get("NONE-ASG-AR"));
                                 } // End VPC
                         }
                 }
