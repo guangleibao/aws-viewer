@@ -7,6 +7,9 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 	- For example: `showVpc demo-vpc redact demo-profile > demo.html`
 2. Show all instance types and are there sufficient capacities for instance types: **`showInstanceType`**
 	- For example: `showInstanceType 1 demo-profile`
+3. Show all regions: **`showRegionCode`**
+4. Show services in a region: **`showServiceByRegionCode`**
+5. Compare services in two regions: **`showServiceCompareByRegionCode`**
 
 ## Configure
 1. Create an IAM user and generate access key and secret.

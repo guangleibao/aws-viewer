@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import com.amazonaws.AmazonClientException;
@@ -17,6 +18,7 @@ import com.amazonaws.services.ec2.model.RunInstancesRequest;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.reflections.Reflections;
 
 import awsviewer.common.Uautoscaling;
 import awsviewer.common.Uec2;
@@ -33,6 +35,8 @@ import awsviewer.conf.General;
 import awsviewer.conf.Helper;
 import awsviewer.conf.Speaker;
 import awsviewer.inf.CUtil;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.regions.ServiceMetadata;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
@@ -48,6 +52,7 @@ public class WaTool {
 
         private static final Helper HELPER = new Helper();
         private static final Speaker SK = Speaker.getConsoleInstance(null);
+        private final Speaker sk = Speaker.getConsoleInstance(null);
         private final Helper helper = new Helper();
 
         public static final ArrayList<String> SKIPPED_METHODS = new ArrayList<String>();
@@ -302,7 +307,8 @@ public class WaTool {
                 for (String it : its) {
                         helper.waitFor(300);
                         RunInstancesRequest realreq = new RunInstancesRequest().withImageId(ami.imageId())
-                                        .withInstanceType(it).withMinCount(Integer.parseInt(count)).withMaxCount(Integer.parseInt(count));
+                                        .withInstanceType(it).withMinCount(Integer.parseInt(count))
+                                        .withMaxCount(Integer.parseInt(count));
                         validTypeSpeaker.printResult(false, it);
                         try {
                                 ec2o.dryRun(realreq).getDryRunResponse();
@@ -332,5 +338,121 @@ public class WaTool {
                                 }
                         }
                 }
+        }
+
+        /**
+         * Show services comparison between two regions.
+         * 
+         * @param regionCode1
+         * @param regionCode2
+         */
+        public void showServiceCompareByRegionCode(String regionCode1, String regionCode2) throws Exception {
+                HELPER.help(regionCode1,
+                                "<region-code1>|<? to get all region codes> <region-code2>|<? to get all region codes>");
+                if (regionCode1.equals("?")) {
+                        this.showRegionCode();
+                } else {
+                        this.sk.printResult(true, regionCode1.toUpperCase() + " |-------------> "
+                                        + regionCode2.toUpperCase() + " (if you see " + Speaker.REMOVING
+                                        + " it means the service is not available or the SDK needs updated)");
+                        this.sk.printLine();
+                        Reflections reflections = new Reflections("software.amazon.awssdk.regions.servicemetadata");
+                        Set<Class<? extends ServiceMetadata>> smClasses = reflections
+                                        .getSubTypesOf(ServiceMetadata.class);
+                        TreeSet<String> serviceMetadataClassNames = new TreeSet<String>();
+                        TreeSet<String> serviceRealNames1 = new TreeSet<String>();
+                        TreeSet<String> serviceRealNames2 = new TreeSet<String>();
+                        TreeSet<String> serviceRealNames3 = new TreeSet<String>();
+                        for (Class<? extends ServiceMetadata> clazz : smClasses) {
+                                String className = clazz.getName();
+                                serviceMetadataClassNames.add(className);
+                        }
+                        int charLongSize = 0;
+                        for (String className : serviceMetadataClassNames) {
+                                String serviceNameReal = className
+                                                .replaceAll("software.amazon.awssdk.regions.servicemetadata.", "")
+                                                .replaceAll("ServiceMetadata$", "");
+                                charLongSize = (serviceNameReal.length() > charLongSize) ? serviceNameReal.length()
+                                                : charLongSize;
+                                ServiceMetadata instance = (ServiceMetadata) Class.forName(className).newInstance();
+                                for (Region r : instance.regions()) {
+                                        if (r.id().equals(regionCode1)) {
+                                                serviceRealNames1.add(serviceNameReal);
+                                                serviceRealNames3.add(serviceNameReal);
+                                        }
+                                        if (r.id().equals(regionCode2)) {
+                                                serviceRealNames2.add(serviceNameReal);
+                                                serviceRealNames3.add(serviceNameReal);
+                                        }
+                                }
+                        }
+                        int sCount = 0;
+                        for (String s : serviceRealNames3) {
+                                if (serviceRealNames1.contains(s) && serviceRealNames2.contains(s)) {
+                                        this.sk.printResult(true, (++sCount) + ") " + s + " |-------------> " + s);
+                                } else if (serviceRealNames1.contains(s) && !serviceRealNames2.contains(s)) {
+                                        this.sk.printResult(true,
+                                                        (++sCount) + ") " + s + " |-------------> " + Speaker.REMOVING
+                                                                        + " " + Speaker.REMOVING + " "
+                                                                        + Speaker.REMOVING);
+                                } else if (!serviceRealNames1.contains(s) && serviceRealNames2.contains(s)) {
+                                        this.sk.printResult(true,
+                                                        (++sCount) + ") " + Speaker.REMOVING + " " + Speaker.REMOVING
+                                                                        + " " + Speaker.REMOVING + " |-------------> "
+                                                                        + s);
+                                }
+                        }
+                }
+                this.sk.printLine();
+        }
+
+        /**
+         * Show all region codes.
+         */
+        public void showRegionCode() {
+                this.sk.smartPrintTitle("AWS Region Infrastructure");
+                int i = 0;
+                for (String key : General.ALL_REGIONS.keySet()) {
+                        this.sk.printResult(true, "[" + (++i) + "] " + key + " = "
+                                        + General.ALL_REGIONS.get(key).metadata().description());
+                }
+                this.sk.printLine();
+        }
+
+        /**
+         * Show services provided in a specific region.
+         */
+        public void showServiceByRegionCode(String regionCode) throws Exception {
+                HELPER.help(regionCode, "<region-code>|<? to get all region codes>");
+                if (regionCode.equals("?")) {
+                        this.showRegionCode();
+                } else {
+                        this.sk.smartPrintTitle("Services provided by " + regionCode);
+                        Reflections reflections = new Reflections("software.amazon.awssdk.regions.servicemetadata");
+                        Set<Class<? extends ServiceMetadata>> smClasses = reflections
+                                        .getSubTypesOf(ServiceMetadata.class);
+                        TreeSet<String> serviceMetadataClassNames = new TreeSet<String>();
+                        TreeSet<String> serviceRealNames = new TreeSet<String>();
+                        for (Class<? extends ServiceMetadata> clazz : smClasses) {
+                                String className = clazz.getName();
+                                serviceMetadataClassNames.add(className);
+                        }
+                        for (String className : serviceMetadataClassNames) {
+                                String serviceNameReal = className
+                                                .replaceAll("software.amazon.awssdk.regions.servicemetadata.", "")
+                                                .replaceAll("ServiceMetadata$", "");
+                                ServiceMetadata instance = (ServiceMetadata) Class.forName(className).newInstance();
+                                for (Region r : instance.regions()) {
+                                        if (r.id().equals(regionCode)) {
+                                                serviceRealNames.add(serviceNameReal);
+                                        }
+                                }
+                        }
+                        int sCount = 0;
+                        for (String s : serviceRealNames) {
+                                this.sk.printResult(true, (++sCount) + ") " + s);
+                        }
+                }
+                this.sk.printLine();
         }
 }
