@@ -12,6 +12,7 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 1. Create an IAM user and generate access key and secret.
 2. Grant **`ReadOnlyAccess`** AWS managed policy to above IAM user. For global regions the policy ARN is: `arn:aws:iam::aws:policy/ReadOnlyAccess`, for China regions the policy ARN is: `arn:aws-cn:iam::aws:policy/ReadOnlyAccess`. As it's name, the policy grants read permissions only.
 3. Follow the [guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) to config named profiles for above IAM user.
+4. `showInstanceType` might need ec2:runInstances permission, but do not worry it uses dry run, it will not generate cost.
 
 ## Install
 1. Install [maven](https://maven.apache.org/install.html).
