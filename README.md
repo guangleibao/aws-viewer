@@ -27,6 +27,8 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 + For example, if the VPC name is **`demo-vpc`** and the named profile is **`demo-profile`**:
 	- Run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc redact demo-profile > demo.html`** in redact mode (recommanded).
  	- Or, run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showVpc demo-vpc plain demo-profile > demo.html`** in plain mode.
++ If you want to check what instance type you can use in specified capacity (such as 1) with named profile **`demo-profile`**:
+	- Run **`$ java -jar target/awsviewer-1.0-SNAPSHOT-jar-with-dependencies.jar showInstanceType 1 demo-profile > demo.html`**
 
 ## More Information about the Usage
 + **`showVpc`** can help checking the reliability pillar of [Well-Architected practices](https://aws.amazon.com/architecture/well-architected/).
