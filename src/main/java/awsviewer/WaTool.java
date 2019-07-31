@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
@@ -454,5 +455,35 @@ public class WaTool {
                         }
                 }
                 this.sk.printLine();
+        }
+
+        /**
+         * Dry run EC2. A good tool to test the instance type and capacity in region.
+         * 
+         * @param instanceType
+         * @param count
+         * @param profile
+         * @throws Exception
+         */
+        public void dryRunEc2(String instanceType, String count, String profile) throws Exception {
+                HELPER.help(instanceType, "<instance-type> <instance-count> <profile>");
+                General.init(profile);
+                Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, profile);
+                Uec2 uec2 = Uec2.build();
+                Image ami = uec2.getOneOfAmazonLinuxAmi(ec2);
+                AWSCredentialsProviderChain ec2Profile = new AWSCredentialsProviderChain(
+                                new ProfileCredentialsProvider(profile));
+                AmazonEC2 ec2o = AmazonEC2ClientBuilder.standard().withCredentials(ec2Profile)
+                                .withRegion(General.PROFILE_REGION.get(profile).id()).build();
+                RunInstancesRequest realreq = new RunInstancesRequest().withImageId(ami.imageId())
+                                .withInstanceType(instanceType).withMinCount(Integer.parseInt(count))
+                                .withMaxCount(Integer.parseInt(count));
+                try {
+                        AmazonServiceException drr = ec2o.dryRun(realreq).getDryRunResponse();
+                        sk.printResult(true, drr.getMessage());
+                        sk.printResult(true, drr.getCause().getMessage());
+                } catch (AmazonClientException ex) {
+                        sk.printResult(true, ex.getCause().getMessage());
+                }
         }
 }
