@@ -201,7 +201,7 @@ public class WaTool {
                 // Define VPCs
                 Filter[] tries = null;
                 if (prefix.equals("?")) {
-                        Filter vpcF = uec2.createFilterEc2("tag:Name", "*");
+                        Filter vpcF = uec2.createFilterEc2("vpc-id", "*");
                         tries = new Filter[] { vpcF };
                 } else {
                         Filter vpcF = uec2.createFilterEc2("tag:Name", prefix + "*");
