@@ -11,6 +11,7 @@ Read only tools (in Java) for AWS resources. It's tested on Mac not Windows.
 4. Show services in a region: **`showServiceByRegionCode`**
 5. Compare services in two regions: **`showServiceCompareByRegionCode`**
 6. Dry run EC2 to test the capacity and your soft limit in region: **`dryRunEc2`**
+7. Dry run EC2 Spot to test the capacity and your soft limit in region: **`dryRunEc2Spot`**
 
 ## Configure
 1. Create an IAM user and generate access key and secret.

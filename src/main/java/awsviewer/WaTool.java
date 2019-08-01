@@ -15,6 +15,8 @@ import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.ec2.model.InstanceMarketOptionsRequest;
+import com.amazonaws.services.ec2.model.MarketType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 
 import org.apache.log4j.Level;
@@ -476,6 +478,34 @@ public class WaTool {
                 AmazonEC2 ec2o = AmazonEC2ClientBuilder.standard().withCredentials(ec2Profile)
                                 .withRegion(General.PROFILE_REGION.get(profile).id()).build();
                 RunInstancesRequest realreq = new RunInstancesRequest().withImageId(ami.imageId())
+                                .withInstanceType(instanceType).withMinCount(Integer.parseInt(count))
+                                .withMaxCount(Integer.parseInt(count));
+                try {
+                        AmazonServiceException drr = ec2o.dryRun(realreq).getDryRunResponse();
+                        sk.printResult(true, drr.getMessage());
+                        sk.printResult(true, drr.getCause().getMessage());
+                } catch (AmazonClientException ex) {
+                        sk.printResult(true, ex.getCause().getMessage());
+                }
+        }
+
+        /**
+         * Dry run EC2 spot. A good tool to test the instance type and capacity in
+         * region. Be noted the test AMI is Linux.
+         */
+        public void dryRunEc2Spot(String instanceType, String count, String profile) throws Exception {
+                HELPER.help(instanceType, "<instance-type> <instance-count> <profile>");
+                General.init(profile);
+                Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, profile);
+                Uec2 uec2 = Uec2.build();
+                Image ami = uec2.getOneOfAmazonLinuxAmi(ec2);
+                AWSCredentialsProviderChain ec2Profile = new AWSCredentialsProviderChain(
+                                new ProfileCredentialsProvider(profile));
+                AmazonEC2 ec2o = AmazonEC2ClientBuilder.standard().withCredentials(ec2Profile)
+                                .withRegion(General.PROFILE_REGION.get(profile).id()).build();
+                RunInstancesRequest realreq = new RunInstancesRequest().withImageId(ami.imageId())
+                                .withInstanceMarketOptions(
+                                                new InstanceMarketOptionsRequest().withMarketType(MarketType.Spot))
                                 .withInstanceType(instanceType).withMinCount(Integer.parseInt(count))
                                 .withMaxCount(Integer.parseInt(count));
                 try {
