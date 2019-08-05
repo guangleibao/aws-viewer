@@ -79,23 +79,21 @@ public class Urds implements CUtil {
                     }
                     if (mode.equals(PLAIN)) {
                         rdsSpeaker.smartPrintResult(true,
-                                Speaker.DB + " RDS-" + (++rdsCount) + ": " + instance.dbInstanceIdentifier()
-                                        + ", DB:" + instance.dbName() + ", " + instance.engine() + ", "
-                                        + instance.engineVersion() + ", status:"
-                                        + instance.dbInstanceStatus() + ", multi-AZ:" + instance.multiAZ()
-                                        + ", admin:" + instance.masterUsername() + ", size:"
-                                        + instance.allocatedStorage() + "G" + ", " + instance.storageType()
-                                        + ", iops:"
-                                        + (instance.storageType().equals("gp2") ? iops : instance.iops()));
+                        Speaker.DB + " RDS-" + (++rdsCount) + "-DB: " + instance.dbName() + ", ID:"
+                                + instance.dbInstanceIdentifier() + ", " + instance.engine() + ", "
+                                + instance.engineVersion() + ", status:" + instance.dbInstanceStatus()
+                                + ", multi-AZ:" + instance.multiAZ() + ", admin:" + instance.masterUsername()
+                                + ", size:" + instance.allocatedStorage() + "G" + ", storage-type:"
+                                + instance.storageType() + ", iops:"
+                                + (instance.storageType().equals("gp2") ? iops : instance.iops()));
                     } else {
                         rdsSpeaker.smartPrintResult(true,
-                                Speaker.DB + " RDS-" + (++rdsCount) + ": " + instance.dbInstanceIdentifier()
-                                        + ", DB:" + instance.dbName() + ", " + instance.engine() + ", "
-                                        + instance.engineVersion() + ", status:"
-                                        + instance.dbInstanceStatus() + ", multi-AZ:" + instance.multiAZ()
-                                        + ", admin:" + hp.redact(instance.masterUsername()) + ", size:"
-                                        + instance.allocatedStorage() + "G" + ", " + instance.storageType()
-                                        + ", iops:"
+                                Speaker.DB + " RDS-" + (++rdsCount) + "-DB: " + instance.dbName() + ", ID:"
+                                        + instance.dbInstanceIdentifier() + ", " + instance.engine() + ", "
+                                        + instance.engineVersion() + ", status:" + instance.dbInstanceStatus()
+                                        + ", multi-AZ:" + instance.multiAZ() + ", admin:"
+                                        + hp.redact(instance.masterUsername()) + ", size:" + instance.allocatedStorage()
+                                        + "G" + ", storage-type:" + instance.storageType() + ", iops:"
                                         + (instance.storageType().equals("gp2") ? iops : instance.iops()));
                     }
                     if (instance.endpoint() != null) {
