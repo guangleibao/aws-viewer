@@ -483,7 +483,7 @@ public class WaTool {
                 try {
                         AmazonServiceException drr = ec2o.dryRun(realreq).getDryRunResponse();
                         sk.printResult(true, drr.getMessage());
-                        sk.printResult(true, drr.getCause().getMessage());
+                        //sk.printResult(true, drr.getCause().getMessage());
                 } catch (AmazonClientException ex) {
                         sk.printResult(true, ex.getCause().getMessage());
                 }
@@ -511,7 +511,7 @@ public class WaTool {
                 try {
                         AmazonServiceException drr = ec2o.dryRun(realreq).getDryRunResponse();
                         sk.printResult(true, drr.getMessage());
-                        sk.printResult(true, drr.getCause().getMessage());
+                        //sk.printResult(true, drr.getCause().getMessage());
                 } catch (AmazonClientException ex) {
                         sk.printResult(true, ex.getCause().getMessage());
                 }
