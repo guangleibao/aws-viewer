@@ -164,11 +164,11 @@ public class WaTool {
         }
 
         /**
-         * Print resources in VPC by VPC name prefix or vpc-id in MD format.
+         * Print resources in VPC by VPC name prefix or vpc-id in HTML format.
          */
         public void showVpc(String prefix, String mode, String profile) throws Exception {
                 // ------------- INIT
-                HELPER.help(prefix, "<vpc-name-prefix|vpc-id|?> <mode: redact|plain> <profile>");
+                HELPER.help(prefix, "<vpc-name-prefix|vpc-id> <mode: redact|plain> <profile>");
 
                 // Define the method Speaker
                 Speaker mSpeaker = Speaker.getWebInstance(profile);
@@ -202,14 +202,15 @@ public class WaTool {
 
                 // Define VPCs
                 Filter[] tries = null;
+                /*
                 if (prefix.equals("?")) {
                         Filter vpcF = uec2.createFilterEc2("vpc-id", "*");
                         tries = new Filter[] { vpcF };
-                } else {
+                } else {*/
                         Filter vpcF = uec2.createFilterEc2("tag:Name", prefix + "*");
                         Filter vpcF2 = uec2.createFilterEc2("vpc-id", prefix);
                         tries = new Filter[] { vpcF, vpcF2 };
-                }
+                //}
 
                 // EC2 Core
                 Ec2Client ec2 = (Ec2Client) Clients.getClientByServiceClass(Clients.EC2, profile);
